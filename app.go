@@ -1,14 +1,14 @@
 package main
 
 import (
-	"net/http"
-	"github.com/gorilla/mux"
-	"log"
 	"encoding/json"
+	"github.com/gorilla/mux"
+	config2 "github.com/gyaan/short-urls/config"
+	dao2 "github.com/gyaan/short-urls/dao"
+	"github.com/gyaan/short-urls/model"
 	"gopkg.in/mgo.v2/bson"
-	"short-urls/model"
-	dao2 "short-urls/dao"
-	config2 "short-urls/config"
+	"log"
+	"net/http"
 )
 
 var dao = dao2.ShortUrlsDao{}

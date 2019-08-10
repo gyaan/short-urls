@@ -1,10 +1,10 @@
 package dao
 
 import (
+	"github.com/gyaan/short-urls/model"
 	"gopkg.in/mgo.v2"
-	"log"
-	"short-urls/model"
 	"gopkg.in/mgo.v2/bson"
+	"log"
 )
 
 type UsersDao struct {
