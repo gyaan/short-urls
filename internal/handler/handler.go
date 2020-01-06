@@ -5,21 +5,34 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
-	"github.com/gyaan/short-urls/internal/database"
 	"github.com/gyaan/short-urls/internal/models"
+	"github.com/gyaan/short-urls/internal/repositories"
 	"net/http"
 )
 
-type Handler struct {
-	database database.Database
+type handler struct {
+	database repositories.ShortUrls
 }
 
-func NewHandler(database2 database.Database) *Handler {
-	return &Handler{
+//Handler
+type Handler interface {
+	HomeHandler(w http.ResponseWriter, r *http.Request)
+	GetAShortUrl(w http.ResponseWriter, r *http.Request)
+	GetAllShortUrl(w http.ResponseWriter, r *http.Request)
+	DeleteShortUrl(w http.ResponseWriter, r *http.Request)
+	CreateShortUrl(w http.ResponseWriter, r *http.Request)
+	UpdateShortUrl(w http.ResponseWriter, r *http.Request)
+}
+
+//NewHandler
+func NewHandler(database2 repositories.ShortUrls) Handler {
+	return &handler{
 		database: database2,
 	}
 }
-func (h *Handler) HomeHandler(w http.ResponseWriter, r *http.Request) {
+
+//HomeHandler
+func (h *handler) HomeHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	_, err := fmt.Fprintf(w, "Welcome to short-urls open source")
@@ -30,7 +43,8 @@ func (h *Handler) HomeHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func (h *Handler) GetAShortUrl(w http.ResponseWriter, r *http.Request) {
+//GetAShortUrl
+func (h *handler) GetAShortUrl(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	_, err := fmt.Fprintf(w, "Implement get a short url handler")
@@ -41,7 +55,8 @@ func (h *Handler) GetAShortUrl(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func (h *Handler) GetAllShortUrl(w http.ResponseWriter, r *http.Request) {
+//GetAllShortUrl
+func (h *handler) GetAllShortUrl(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	urls, err := h.database.GetAllShortUrls(context.Background())
@@ -55,7 +70,8 @@ func (h *Handler) GetAllShortUrl(w http.ResponseWriter, r *http.Request) {
 	w.Write(bytes)
 }
 
-func (h *Handler) DeleteShortUrl(w http.ResponseWriter, r *http.Request) {
+//DeleteShortUrl
+func (h *handler) DeleteShortUrl(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	_, err := fmt.Fprintf(w, "Implement delete short urls handler")
@@ -66,7 +82,8 @@ func (h *Handler) DeleteShortUrl(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func (h *Handler) CreateShortUrl(w http.ResponseWriter, r *http.Request) {
+//CreateShortUrl
+func (h *handler) CreateShortUrl(w http.ResponseWriter, r *http.Request) {
 
 	err := h.database.CreateShortUrl(context.Background(), models.ShortUrl{
 		Url: "http://google.com",
@@ -80,7 +97,8 @@ func (h *Handler) CreateShortUrl(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "short url created!")
 }
 
-func (h *Handler) UpdateShortUrl(w http.ResponseWriter, r *http.Request) {
+//UpdateShortUrl
+func (h *handler) UpdateShortUrl(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	w.WriteHeader(http.StatusOK)
 	fmt.Fprint(w, vars["short_url_id"])

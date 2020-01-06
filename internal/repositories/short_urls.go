@@ -1,4 +1,4 @@
-package database
+package repositories
 
 import (
 	"context"
@@ -11,25 +11,27 @@ import (
 	"time"
 )
 
-type database struct {
+type shortUrls struct {
 	MongoClient *mongo.Client
 }
 
-type Database interface {
+type ShortUrls interface {
 	CreateShortUrl(ctx context.Context, url models.ShortUrl) error
 	GetAllShortUrls(ctx context.Context) ([]models.ShortUrl, error)
 	UpdateShortUrls(ctx context.Context, shortUrl models.ShortUrl) error
 }
 
-func NewDatabase(client *mongo.Client) Database {
-	return &database{
+// NewDatabase creates new repositories utility
+func NewShortUrlRepository(client *mongo.Client) ShortUrls {
+	return &shortUrls{
 		MongoClient: client,
 	}
 }
 
-func (db *database) CreateShortUrl(ctx context.Context, url models.ShortUrl) error {
+//CreateShortUrl creates new short urls
+func (s *shortUrls) CreateShortUrl(ctx context.Context, url models.ShortUrl) error {
 
-	collection := db.MongoClient.Database("my_project").Collection("short_urls")
+	collection := s.MongoClient.Database("my_project").Collection("short_urls")
 
 	//todo move this to some where else before creating it
 	shortUrlService := services.NewShortUrlService()
@@ -45,8 +47,9 @@ func (db *database) CreateShortUrl(ctx context.Context, url models.ShortUrl) err
 	return nil
 }
 
-func (db *database) GetAllShortUrls(ctx context.Context) ([]models.ShortUrl, error) {
-	collection := db.MongoClient.Database("my_project").Collection("short_urls")
+//GetAllShortUrls returns all short urls
+func (s *shortUrls) GetAllShortUrls(ctx context.Context) ([]models.ShortUrl, error) {
+	collection := s.MongoClient.Database("my_project").Collection("short_urls")
 	ctx1, _ := context.WithTimeout(context.Background(), 30*time.Second)
 
 	var res []models.ShortUrl
@@ -75,8 +78,9 @@ func (db *database) GetAllShortUrls(ctx context.Context) ([]models.ShortUrl, err
 	return res, nil
 }
 
-func (db *database) UpdateShortUrls(ctx context.Context, shortUrl models.ShortUrl) error {
-	collection := db.MongoClient.Database("my_project").Collection("short_urls")
+//UpdateShortUrls update existing short url
+func (s *shortUrls) UpdateShortUrls(ctx context.Context, shortUrl models.ShortUrl) error {
+	collection := s.MongoClient.Database("my_project").Collection("short_urls")
 	ctx1, _ := context.WithTimeout(context.Background(), 30*time.Second)
 
 	filter := bson.D{{"actual_url", shortUrl.Url}}

@@ -7,6 +7,7 @@ type Config struct {
 	MongoDbConnectionUrl string `json:"mongo_db_connection_url"`
 }
 
+// NewConfig returns creates new application config
 func NewConfig(config Config) *Config {
 
 	conf = &Config{
@@ -16,6 +17,7 @@ func NewConfig(config Config) *Config {
 	return conf
 }
 
+// GetConf returns config
 func GetConf() *Config {
 	return conf
 }
