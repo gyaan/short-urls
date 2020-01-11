@@ -13,12 +13,14 @@ type MongoClient struct {
 	conf *config.Config
 }
 
+//NewMongoClient
 func NewMongoClient(conf *config.Config) *MongoClient {
 	return &MongoClient{
 		conf: conf,
 	}
 }
 
+//GetClient returns mongo client
 func (m *MongoClient) GetClient() (*mongo.Client, error) {
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 
@@ -29,4 +31,16 @@ func (m *MongoClient) GetClient() (*mongo.Client, error) {
 		return nil, err
 	}
 	return client, nil
+}
+
+//Ping verify mongo connection
+func (m *MongoClient) Ping() error {
+
+	client, err := m.GetClient()
+	if err != nil {
+		log.Fatalf(err.Error())
+	}
+
+	err = client.Ping(context.TODO(), nil)
+	return err
 }
