@@ -58,15 +58,6 @@ func (s urlShortener) convertNumberToShortUrl(n int) string {
 func (s urlShortener) convertShortUrlToNumber(str string) int {
 
 	num := 0
-	/*
-		if ('a' <= shortURL[i] && shortURL[i] <= 'z')
-		id = id*62 + shortURL[i] - 'a';
-		if ('A' <= shortURL[i] && shortURL[i] <= 'Z')
-		id = id*62 + shortURL[i] - 'A' + 26; a := 0
-		if ('0' <= shortURL[i] && shortURL[i] <= '9')
-		id = id*62 + shortURL[i] - '0' + 52;
-	*/
-
 	for i := 0; i < len(str); i++ {
 
 		if 'a' <= str[i] && str[i] <= 'z' {

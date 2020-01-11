@@ -6,6 +6,7 @@ import (
 	"github.com/gyaan/short-urls/config"
 	"github.com/gyaan/short-urls/internal/models"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"log"
 	"time"
@@ -18,8 +19,7 @@ type users struct {
 //Users
 type Users interface {
 	CreateUser(ctx context.Context, user models.User) (*models.User, error)
-	UpdateUser(ctx context.Context, user models.User) (*models.User, error)
-	DeleteUser(ctx context.Context, user models.User) (*models.User, error)
+	UpdateUser(ctx context.Context, userId string, user models.User) error
 }
 
 //NewUserRepository
@@ -31,33 +31,42 @@ func NewUserRepository(client *mongo.Client) Users {
 
 //CreateUser creates new user
 func (u *users) CreateUser(ctx context.Context, user models.User) (*models.User, error) {
-
 	collection := u.mongoClient.Database(config.GetConf().MongoDatabaseName).Collection("users")
-
-	res, err := collection.InsertOne(ctx, bson.M{"name": user.Name, "email": user.Email, "password": user.Password, "status": user.Status})
-	fmt.Print(res.InsertedID)
+	res, err := collection.InsertOne(ctx, user)
 
 	if err != nil {
-		log.Print("error creating short urls")
+		log.Printf("Error in user creation")
 		return nil, err
 	}
-
-	return nil, nil
+	fmt.Printf("successfully user created with id %v", res.InsertedID)
+	return &user, nil
 }
 
 //UpdateUser updates a user
-func (u *users) UpdateUser(ctx context.Context, user models.User) (*models.User, error) {
+func (u *users) UpdateUser(ctx context.Context, userId string, user models.User) error {
 
 	collection := u.mongoClient.Database(config.GetConf().MongoDatabaseName).Collection("users")
 	ctx1, _ := context.WithTimeout(context.Background(), 30*time.Second)
 
-	filter := bson.D{{"email", user.Email}}
-	_, err := collection.UpdateOne(ctx1, filter, user)
+	id, err := primitive.ObjectIDFromHex(userId)
+	if err != nil {
+		fmt.Printf("Error getting mongo object id for user id %s", userId)
+		return err
+	}
 
-	return nil, err
-}
+	filter := bson.D{{"_id", id}}
+	res, err := collection.UpdateOne(ctx1, filter, bson.D{{
+		"$set", bson.D{
+			{"email", user.Email},
+			{"password", user.Password},
+			{"status", user.Status},
+		},
+	}})
+	if err != nil {
+		fmt.Printf("Error updating user details for user id %s", userId)
+		return err
+	}
 
-//DeleteUser deletes a user
-func (u *users) DeleteUser(ctx context.Context, user models.User) (*models.User, error) {
-	panic("implement me")
+	log.Printf("Successfully update user details for user id %s, total updated records %d", userId, res.UpsertedCount)
+	return nil
 }
