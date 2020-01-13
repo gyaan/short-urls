@@ -15,6 +15,7 @@ type CreateShortUrlRequest struct {
 	Url string `json:"url"`
 }
 
+//UpdateShortUrlRequest
 type UpdateShortUrlRequest struct {
 	Status int `json:"status"`
 }
@@ -32,10 +33,10 @@ func (h *handler) CreateShortUrl(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = url.New().ValidateUrl(srtUrlReq.Url)
-	if err != nil {
+	validUrl := url.New().ValidateUrl(srtUrlReq.Url)
+	if !validUrl {
 		log.Printf("url validation failed for url %s", srtUrlReq.Url)
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, "invalid url", http.StatusBadRequest)
 		return
 	}
 
@@ -126,7 +127,7 @@ func (h *handler) UpdateShortUrl(w http.ResponseWriter, r *http.Request) {
 	}
 
 	vars := mux.Vars(r)
-	err = h.shortUrlRepository.UpdateShortUrls(r.Context(), vars["short_url_id"], models.ShortUrl{Status: srtUrlUpdateRequest.Status})
+	err = h.shortUrlRepository.UpdateShortUrls(r.Context(), vars["short_url_id"], models.ShortUrl{Status: int32(srtUrlUpdateRequest.Status)})
 
 	if err != nil {
 		log.Printf("Error updating short url details for short url id %v", vars["short_url_id"])
@@ -139,5 +140,16 @@ func (h *handler) UpdateShortUrl(w http.ResponseWriter, r *http.Request) {
 
 //RedirectToActualUrl redirect short urls to actual url
 func (h *handler) RedirectToActualUrl(w http.ResponseWriter, r *http.Request) {
-	panic("implement me")
+	vars := mux.Vars(r)
+	log.Printf("Redirecting to actual url for short url %s", vars["short_url"])
+
+	shortUrl, err := h.shortUrlRepository.GetActualUrlOfAShortUrl(r.Context(), vars["short_url"])
+
+	if err != nil {
+		log.Printf("Error with url redirection for short url %s", vars["short_url"])
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	http.Redirect(w, r, shortUrl.Url, http.StatusSeeOther)
 }

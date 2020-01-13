@@ -40,11 +40,6 @@ func NewHandler(shortUrlRepository repositories.ShortUrls, userRepository reposi
 
 //HomeHandler handles / urls (base url)
 func (h *handler) HomeHandler(w http.ResponseWriter, r *http.Request) {
-
 	w.WriteHeader(http.StatusOK)
-	_, err := fmt.Fprintf(w, "Welcome to short-urls open source")
-
-	if err != nil {
-		fmt.Println("something went wrong!")
-	}
+	fmt.Fprintf(w, "Welcome to short-urls open source")
 }

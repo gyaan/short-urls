@@ -11,6 +11,7 @@ import (
 	"net/http"
 )
 
+//CreateUserRequest
 type CreateUserRequest struct {
 	Name            string `json:"name"`
 	Email           string `json:"email"`
@@ -18,6 +19,7 @@ type CreateUserRequest struct {
 	ConfirmPassword string `json:"confirm_password"`
 }
 
+//UpdateUserRequest
 type UpdateUserRequest struct {
 	Password string `json:"password"`
 	Email    string `json:"email"`

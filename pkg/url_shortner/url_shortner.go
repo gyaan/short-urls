@@ -1,29 +1,30 @@
 package url_shortner
 
-import "strconv"
+import (
+	"strconv"
+)
 
 type urlShortener struct {
-	charMap map[int]string
+	charMap map[int64]string
 }
 
+//UrlShortener
 type UrlShortener interface {
-	GetShortUrl(urlIdentifier int) string
+	GetShortUrl(urlIdentifier int64) string
+	GetIdentifierNumberFromShortUrl(str string) int64
 }
 
+//New
 func New() UrlShortener {
 	return &urlShortener{
 		charMap: getCharMap(),
 	}
 }
 
-func (s *urlShortener) GetShortUrl(urlIdentifier int) string {
-	return s.convertNumberToShortUrl(urlIdentifier)
-}
+func getCharMap() map[int64]string {
 
-func getCharMap() map[int]string {
-
-	chrMap := map[int]string{}
-	mapIndex := 0
+	chrMap := map[int64]string{}
+	mapIndex := int64(0)
 
 	//a - z
 	for j := rune('a'); j <= rune('z'); j++ {
@@ -46,32 +47,50 @@ func getCharMap() map[int]string {
 	return chrMap
 }
 
-func (s urlShortener) convertNumberToShortUrl(n int) string {
+func (s urlShortener) GetShortUrl(n int64) string {
 	srtUlr := ""
 	for n > 0 {
 		srtUlr += s.charMap[n%62]
 		n = n / 62
 	}
-	return srtUlr
+	return reversString(srtUlr)
 }
 
-func (s urlShortener) convertShortUrlToNumber(str string) int {
+func (s urlShortener) GetIdentifierNumberFromShortUrl(str string) int64 {
 
-	num := 0
+	num := int64(0)
 	for i := 0; i < len(str); i++ {
 
 		if 'a' <= str[i] && str[i] <= 'z' {
-			num = num*62 + int(str[i]) - int('a')
+			num = num*62 + int64(rune(str[i])) - int64(rune('a'))
 		}
 
 		if 'A' <= str[i] && str[i] <= 'Z' {
-			num = num*62 + int(str[i]) - int('A') + 26
+			num = num*62 + int64(rune(str[i])) - int64(rune('A')) + 26
 		}
 
 		if '0' <= str[i] && str[i] <= '9' {
-			num = num*62 + int(str[i]) - int('0') + 52
+			num = num*62 + int64(rune(str[i])) - int64(rune('0')) + 52
 		}
 
 	}
 	return num
+}
+
+func reversString(str string) string {
+
+	// Get Unicode code points.
+	n := 0
+	rune := make([]rune, len(str))
+	for _, r := range str {
+		rune[n] = r
+		n++
+	}
+	rune = rune[0:n]
+	// Reverse
+	for i := 0; i < n/2; i++ {
+		rune[i], rune[n-1-i] = rune[n-1-i], rune[i]
+	}
+	// Convert back to UTF-8.
+	return string(rune)
 }
