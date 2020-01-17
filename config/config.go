@@ -8,8 +8,10 @@ type Config struct {
 	MongoDatabaseName         string `json:"mongo_database_name"`
 	ShortUrlExpiryTime        int    `json:"short_url_expiry_time"` // time in hours
 	BaseUrl                   string `json:"base_url"`
-	MinimumShortUrlIdentifier int `json:"minimum_short_url_identifier"` //todo use this config
+	MinimumShortUrlIdentifier int    `json:"minimum_short_url_identifier"`
 	MongoContextTimeout       int    `json:"mongo_context_timeout"`
+	JWTSecret                 string `json:"jwt_secret"`
+	TokenExpiryTime           int64  `json:"token_expiry_time"`
 }
 
 // NewConfig returns creates new application config
@@ -23,6 +25,8 @@ func NewConfig(config Config) *Config {
 		BaseUrl:                   config.BaseUrl,
 		MinimumShortUrlIdentifier: config.MinimumShortUrlIdentifier,
 		MongoContextTimeout:       config.MongoContextTimeout,
+		JWTSecret:                 config.JWTSecret,
+		TokenExpiryTime:           config.TokenExpiryTime,
 	}
 	return conf
 }

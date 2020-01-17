@@ -23,11 +23,14 @@ type Handler interface {
 	UpdateShortUrl(w http.ResponseWriter, r *http.Request)
 
 	//user handler
-	CreateUser(w http.ResponseWriter, r *http.Request)
+	RegisterUser(w http.ResponseWriter, r *http.Request)
 	UpdateUser(w http.ResponseWriter, r *http.Request)
 
 	//redirect short url to actual url
 	RedirectToActualUrl(w http.ResponseWriter, r *http.Request)
+
+	//authentication handler
+	GetAccessToken(w http.ResponseWriter, r *http.Request)
 }
 
 //NewHandler creates new Handler

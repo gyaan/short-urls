@@ -26,8 +26,8 @@ type UpdateUserRequest struct {
 	Status   int    `json:"status"`
 }
 
-//CreateUser creates a new user
-func (h *handler) CreateUser(w http.ResponseWriter, r *http.Request) {
+//RegisterUser creates a new user
+func (h *handler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 	var createUserRequest CreateUserRequest
 
 	decoder := json.NewDecoder(r.Body)
@@ -92,7 +92,7 @@ func (h *handler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	vars := mux.Vars(r) //todo take this from jwt token
+	vars := mux.Vars(r) //todo take this from jwt access-token
 
 	//get password hash
 	password, err := bcrypt.GenerateFromPassword([]byte(updateUserRequest.Password), bcrypt.MinCost)

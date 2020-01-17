@@ -20,6 +20,7 @@ type users struct {
 type Users interface {
 	CreateUser(ctx context.Context, user models.User) (*models.User, error)
 	UpdateUser(ctx context.Context, userId string, user models.User) error
+	GetUserDetails(ctx context.Context, name string) (*models.User, error)
 }
 
 //NewUserRepository
@@ -29,7 +30,7 @@ func NewUserRepository(client *mongo.Client) Users {
 	}
 }
 
-//CreateUser creates new user
+//RegisterUser creates new user
 func (u *users) CreateUser(ctx context.Context, user models.User) (*models.User, error) {
 	collection := u.mongoClient.Database(config.GetConf().MongoDatabaseName).Collection("users")
 	res, err := collection.InsertOne(ctx, user)
@@ -69,4 +70,21 @@ func (u *users) UpdateUser(ctx context.Context, userId string, user models.User)
 
 	log.Printf("Successfully update user details for user id %s, total updated records %d", userId, res.UpsertedCount)
 	return nil
+}
+
+//GetUserDetails get user details for a name and password
+func (u *users) GetUserDetails(ctx context.Context, name string) (*models.User, error) {
+	collection := u.mongoClient.Database(config.GetConf().MongoDatabaseName).Collection("users")
+	ctx1, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	var user models.User
+
+	filter := bson.D{{"name", name}}
+	err := collection.FindOne(ctx1, filter).Decode(&user)
+	if err != nil {
+		log.Printf("Error getting user details")
+		log.Print(err)
+		return nil, err
+	}
+	return &user, nil
 }

@@ -8,6 +8,7 @@ import (
 	"github.com/gyaan/short-urls/pkg/url"
 	"log"
 	"net/http"
+	"strings"
 )
 
 //CreateShortUrlRequest
@@ -151,5 +152,10 @@ func (h *handler) RedirectToActualUrl(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Redirect(w, r, shortUrl.Url, http.StatusSeeOther)
+	redirectUrl := shortUrl.Url
+	if !strings.Contains(shortUrl.Url, "http") { //todo move this to url validation
+		redirectUrl = "http://" + redirectUrl
+	}
+
+	http.Redirect(w, r, redirectUrl, http.StatusSeeOther)
 }

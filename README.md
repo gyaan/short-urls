@@ -1,6 +1,5 @@
 # short-urls
-
-short urls create tiny url of a long urls and keep track of clicks. short urls required when some want to send urls to messages or emails. short url reduced the text of message. 
+Short urls create tiny url of a long urls and keep track of clicks. short urls required when someone want to send urls in messages or emails or keep it short to remember it. short url reduced the text of message. 
 
 ## Implementation
 TODO create a short diagram for implementation and explanation of each component

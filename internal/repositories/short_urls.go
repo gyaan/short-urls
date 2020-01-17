@@ -54,7 +54,7 @@ func (s *shortUrls) CreateShortUrl(ctx context.Context, urlString string) (*mode
 	srtUrl.Status = 1 //default status active
 	srtUrl.CreatedAt = time.Now()
 	srtUrl.ExpireTime = time.Now().Add(time.Duration(config.GetConf().ShortUrlExpiryTime) * time.Hour)
-	srtUrl.CreatedBy = "" //todo get the user id from token
+	srtUrl.CreatedBy = "" //todo get the user id from access-token
 
 	res, err := collection.InsertOne(ctx, srtUrl)
 	if err != nil {
