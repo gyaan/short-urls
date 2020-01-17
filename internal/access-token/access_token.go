@@ -8,11 +8,14 @@ import (
 	"time"
 )
 
+//Claims
 type Claims struct {
 	Name string `json:"username"`
 	jwt.StandardClaims
 }
 
+// GetToken returns a token for verified user
+// use this function after user verification
 func GetToken(name string) (string, error) {
 	expirationTime := time.Now().Add(time.Duration(config.GetConf().TokenExpiryTime) * time.Minute)
 	claims := &Claims{
@@ -30,6 +33,7 @@ func GetToken(name string) (string, error) {
 	return tokenString, nil
 }
 
+// ValidateToken validate a access token
 func ValidateToken(tokenString string) (bool, error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {

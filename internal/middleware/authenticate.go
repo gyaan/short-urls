@@ -8,6 +8,7 @@ import (
 	"strings"
 )
 
+// Authenticate validate access token passed in request
 func Authenticate(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		reqToken := r.Header.Get("Authorization")
@@ -24,17 +25,13 @@ func Authenticate(next http.Handler) http.Handler {
 			return
 		}
 		reqToken = strings.TrimSpace(splitToken[1])
-
 		isValid, err := access_token.ValidateToken(reqToken)
-
-		if err != nil {
+		if !isValid || err != nil {
 			log.Println("error in access-token validation")
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		if isValid {
-			next.ServeHTTP(w, r)
-		}
+		next.ServeHTTP(w, r)
 	})
 }

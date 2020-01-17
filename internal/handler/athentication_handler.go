@@ -10,16 +10,19 @@ import (
 	"net/http"
 )
 
+//AccessTokenRequest
 type AccessTokenRequest struct {
 	Name     string `json:"name"`
 	Password string `json:"password"`
 }
 
+//AccessTokenResponse
 type AccessTokenResponse struct {
 	Name        string `json:"name"`
 	AccessToken string `json:"access_token"`
 }
 
+//GetAccessToken returns the access token after user verification
 func (h *handler) GetAccessToken(w http.ResponseWriter, r *http.Request) {
 	//verify user credentials and release access access-token
 
