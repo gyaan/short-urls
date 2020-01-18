@@ -1,0 +1,33 @@
+version: '3'
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '1334:1334'
+  web:
+    build:
+      context: web
+      dockerfile: Dockerfile
+      volumes:
+        - '.:/app'
+        - '/app/node_modules'
+        ports:
+          - '3001:3000'
+        environment:
+          - NODE_ENV=development
+  database:
+    image: 'mongo'
+    environment:
+      - MONGO_INITDB_DATABASE=short_urls
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=admin
+    volumes:
+      - ./init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+      - ./mongo-volume:/data/db
+    ports:
+      - '27017-27019:27017-27019'
+
+
+
