@@ -3,6 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/go-chi/chi"
 	"github.com/gorilla/mux"
 	"github.com/gyaan/short-urls/internal/models"
 	"github.com/gyaan/short-urls/pkg/url"
@@ -62,12 +63,12 @@ func (h *handler) CreateShortUrl(w http.ResponseWriter, r *http.Request) {
 //GetAShortUrl returns a single url details using url id
 func (h *handler) GetAShortUrl(w http.ResponseWriter, r *http.Request) {
 
-	vars := mux.Vars(r)
-	log.Printf("Get short url details for %s", vars["short_url_id"])
+	shortUrlId := chi.URLParam(r, "short_url_id")
+	log.Printf("Get short url details for %s", shortUrlId)
 
-	srtUrl, err := h.shortUrlRepository.GetAShortUrl(r.Context(), vars["short_url_id"])
+	srtUrl, err := h.shortUrlRepository.GetAShortUrl(r.Context(), shortUrlId)
 	if err != nil {
-		log.Printf("Error fetching short url details for %s", vars["short_url_id"])
+		log.Printf("Error fetching short url details for %s", shortUrlId)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -104,11 +105,11 @@ func (h *handler) GetAllShortUrl(w http.ResponseWriter, r *http.Request) {
 //DeleteShortUrl deletes a url using url id
 func (h *handler) DeleteShortUrl(w http.ResponseWriter, r *http.Request) {
 
-	vars := mux.Vars(r)
-	err := h.shortUrlRepository.DeleteShortUrl(r.Context(), vars["short_url_id"])
+	shortUrlId := chi.URLParam(r, "short_url_id")
+	err := h.shortUrlRepository.DeleteShortUrl(r.Context(), shortUrlId)
 
 	if err != nil {
-		log.Printf("Error deleting shor url for id %s", vars["short_url_id"])
+		log.Printf("Error deleting shor url for id %s", shortUrlId)
 	}
 	w.WriteHeader(http.StatusOK)
 	fmt.Fprint(w, "successfully deleted short url entry")
@@ -127,11 +128,11 @@ func (h *handler) UpdateShortUrl(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	vars := mux.Vars(r)
-	err = h.shortUrlRepository.UpdateShortUrls(r.Context(), vars["short_url_id"], models.ShortUrl{Status: int32(srtUrlUpdateRequest.Status)})
+	shortUrlId := chi.URLParam(r, "short_url_id")
+	err = h.shortUrlRepository.UpdateShortUrls(r.Context(), shortUrlId, models.ShortUrl{Status: int32(srtUrlUpdateRequest.Status)})
 
 	if err != nil {
-		log.Printf("Error updating short url details for short url id %v", vars["short_url_id"])
+		log.Printf("Error updating short url details for short url id %v", shortUrlId)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 

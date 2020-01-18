@@ -115,7 +115,7 @@ func (s *shortUrls) UpdateShortUrls(ctx context.Context, shortUrlId string, shor
 	}
 
 	//updating status only as of now
-	filter := bson.D{{"_id", objectId}, {"created_by", ctx.Value("user_id")}}
+	filter := bson.D{{"_id", objectId},{"created_by",ctx.Value("user_id")}}
 	res, err := collection.UpdateOne(ctx1, filter, bson.D{{"$set", bson.D{{"status", shortUrl.Status}}}})
 
 	if err != nil {
@@ -165,7 +165,7 @@ func (s *shortUrls) DeleteShortUrl(ctx context.Context, srtUrlId string) error {
 		return err
 	}
 
-	filter := bson.D{{"_id", id}, {"created_by", ctx.Value("user_id")}}
+	filter := bson.D{{"_id", id},{"created_by",ctx.Value("user_id")}}
 	res, err := collection.DeleteOne(ctx1, filter)
 	if err != nil {
 		log.Printf("Error in deleting short url details for short url id %s", srtUrlId)

@@ -19,7 +19,12 @@ func RegisterRoutes(h handler.Handler, r *chi.Mux) {
 
 	//user
 	routes.r.Post("/register", routes.h.RegisterUser)
-	routes.r.Put("/users/{user_id}", routes.h.UpdateUser)
+
+	//protect user routes
+	userRouter := chi.NewRouter()
+	userRouter.Use(middleware.Authenticate)
+	userRouter.Put("/{user_id}", routes.h.UpdateUser)
+	userRouter.Get("/", routes.h.GetUser)
 
 	//authentication
 	routes.r.Post("/access-token", routes.h.GetAccessToken)
@@ -38,4 +43,5 @@ func RegisterRoutes(h handler.Handler, r *chi.Mux) {
 
 	//add short url auth protect routs
 	routes.r.Mount("/short-urls", shortUrlRouter)
+	routes.r.Mount("/users", userRouter)
 }

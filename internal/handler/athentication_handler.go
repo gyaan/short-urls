@@ -43,7 +43,7 @@ func (h *handler) GetAccessToken(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Generating access-token for %s", accessTokenRequest.Name)
 
 	//get user details
-	user, err := h.userRepository.GetUserDetails(r.Context(), accessTokenRequest.Name)
+	user, err := h.userRepository.GetUserDetailsByName(r.Context(), accessTokenRequest.Name)
 	if user == nil {
 		log.Printf("wrong credentials for access access-token")
 		http.Error(w, errors.New("wrong credentials for access access-token").Error(), http.StatusBadRequest)

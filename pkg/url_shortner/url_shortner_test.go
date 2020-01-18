@@ -117,7 +117,7 @@ func Example_urlShortener_getCharMap() {
 
 func Test_urlShortener_GetShortUrl(t *testing.T) {
 	type args struct {
-		n int
+		n int64
 	}
 	tests := []struct {
 		name string
@@ -158,7 +158,7 @@ func Test_urlShortener_GetIdentifierNumberFromShortUrl(t *testing.T) {
 		name string
 		s    urlShortener
 		args args
-		want int
+		want int64
 	}{
 		{
 			name: "valid",
@@ -168,7 +168,7 @@ func Test_urlShortener_GetIdentifierNumberFromShortUrl(t *testing.T) {
 			args: args{
 				"tI",
 			},
-			want: int(1212),
+			want: int64(1212),
 		},
 	}
 	for _, tt := range tests {

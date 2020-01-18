@@ -25,6 +25,7 @@ type Handler interface {
 	//user handler
 	RegisterUser(w http.ResponseWriter, r *http.Request)
 	UpdateUser(w http.ResponseWriter, r *http.Request)
+	GetUser(w http.ResponseWriter, r *http.Request)
 
 	//redirect short url to actual url
 	RedirectToActualUrl(w http.ResponseWriter, r *http.Request)

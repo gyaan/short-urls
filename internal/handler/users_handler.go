@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/gorilla/mux"
 	"github.com/gyaan/short-urls/internal/models"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"golang.org/x/crypto/bcrypt"
@@ -95,7 +94,7 @@ func (h *handler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	vars := mux.Vars(r) //todo take this from jwt access-token
+	userId := fmt.Sprintf("%v", r.Context().Value("user_id"))
 
 	//get password hash
 	password, err := bcrypt.GenerateFromPassword([]byte(updateUserRequest.Password), bcrypt.MinCost)
@@ -106,18 +105,40 @@ func (h *handler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//todo update only if field available
-	err = h.userRepository.UpdateUser(r.Context(), vars["user_id"], models.User{
+	err = h.userRepository.UpdateUser(r.Context(), userId, models.User{
 		Status:   updateUserRequest.Status,
 		Password: string(password),
 		Email:    updateUserRequest.Email,
 	})
 
 	if err != nil {
-		log.Printf("Error updating user details for %s", vars["user_id"])
+		log.Printf("Error updating user details for %s", userId)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	w.WriteHeader(http.StatusOK)
 	fmt.Fprint(w, "successfully update user details")
+}
+
+func (h *handler) GetUser(w http.ResponseWriter, r *http.Request) {
+
+	userId := fmt.Sprintf("%v", r.Context().Value("user_id"))
+
+	//get user details
+	user, err := h.userRepository.GetUserDetailsById(r.Context(), userId)
+	if err != nil {
+		log.Printf("error fetching user details")
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	bytes, err := json.Marshal(user)
+	if err != nil {
+		log.Printf("Error marshaling user details")
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprint(w, string(bytes))
 }
