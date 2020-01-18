@@ -1,6 +1,7 @@
 package access_token
 
 import (
+	"errors"
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gyaan/short-urls/internal/config"
@@ -10,31 +11,41 @@ import (
 
 //Claims
 type Claims struct {
-	Name string `json:"username"`
+	Id string `json:"id"`
 	jwt.StandardClaims
 }
 
 // GetToken returns a token for verified user
 // use this function after user verification
-func GetToken(name string) (string, error) {
+func GetToken(UserId string) (string, error) {
+
+	//set expiration time for token
 	expirationTime := time.Now().Add(time.Duration(config.GetConf().TokenExpiryTime) * time.Minute)
+
+	//create claim
 	claims := &Claims{
-		Name: name,
+		Id: UserId,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expirationTime.Unix(),
 		},
 	}
+	//creat token with hs256 method
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+	//get token string
 	tokenString, err := token.SignedString([]byte(config.GetConf().JWTSecret))
 	if err != nil {
 		log.Printf("error generating access access-token")
 		return "", err
 	}
+
 	return tokenString, nil
 }
 
-// ValidateToken validate a access token
-func ValidateToken(tokenString string) (bool, error) {
+// ValidateToken validate a access token and return claims
+func ValidateToken(tokenString string) (map[string]interface{}, error) {
+
+	//parse token
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
@@ -42,14 +53,19 @@ func ValidateToken(tokenString string) (bool, error) {
 		return []byte(config.GetConf().JWTSecret), nil
 	})
 
+	//error parsing token
 	if err != nil {
-		return false, err
+		return nil, err
 	}
 
-	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		log.Printf("access-token validated for user %s", claims["name"])
-		return true, nil
-	} else {
-		return false, err
+	//Get the claim and verify token is valid or not
+	claims, ok := token.Claims.(jwt.MapClaims)
+
+	//issue with claims or token is not valid
+	if !ok || !token.Valid {
+		return nil, errors.New("access token is not a valid token")
 	}
+
+	//everything is fine
+	return claims, nil
 }

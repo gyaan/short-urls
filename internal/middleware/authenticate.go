@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"context"
 	"errors"
 	"github.com/gyaan/short-urls/internal/access-token"
 	"log"
@@ -25,13 +26,16 @@ func Authenticate(next http.Handler) http.Handler {
 			return
 		}
 		reqToken = strings.TrimSpace(splitToken[1])
-		isValid, err := access_token.ValidateToken(reqToken)
-		if !isValid || err != nil {
+		claims, err := access_token.ValidateToken(reqToken)
+
+		if err != nil {
 			log.Println("error in access-token validation")
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		next.ServeHTTP(w, r)
+		//add user_id to context for later use in handler
+		newContext := context.WithValue(r.Context(), "user_id", claims["id"])
+		next.ServeHTTP(w, r.WithContext(newContext))
 	})
 }

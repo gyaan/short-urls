@@ -29,7 +29,6 @@ type Config struct {
 
 // NewConfig returns creates new application config
 func New() *Config {
-
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath(basePath + "/config")
 	viper.SetConfigName("config")

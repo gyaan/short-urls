@@ -6,9 +6,11 @@ import (
 	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/gyaan/short-urls/internal/models"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"golang.org/x/crypto/bcrypt"
 	"log"
 	"net/http"
+	"time"
 )
 
 //CreateUserRequest
@@ -56,6 +58,7 @@ func (h *handler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user, err := h.userRepository.CreateUser(r.Context(), models.User{
+		ID:       primitive.NewObjectIDFromTimestamp(time.Now()),
 		Name:     createUserRequest.Name,
 		Email:    createUserRequest.Email,
 		Password: string(password),

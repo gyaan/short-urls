@@ -18,7 +18,7 @@ type AccessTokenRequest struct {
 
 //AccessTokenResponse
 type AccessTokenResponse struct {
-	Name        string `json:"name"`
+	Id          string `json:"id"`
 	AccessToken string `json:"access_token"`
 }
 
@@ -58,14 +58,14 @@ func (h *handler) GetAccessToken(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tokenString, err := access_token.GetToken(accessTokenRequest.Name)
+	tokenString, err := access_token.GetToken(user.ID.Hex())
 	if err != nil {
 		log.Printf("error in access access-token generation")
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 	accessTokenRes := AccessTokenResponse{
-		Name:        user.Name,
+		Id:          user.ID.Hex(),
 		AccessToken: tokenString,
 	}
 

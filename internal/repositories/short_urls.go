@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"context"
+	"fmt"
 	"github.com/gyaan/short-urls/internal/config"
 	"github.com/gyaan/short-urls/internal/models"
 	"github.com/gyaan/short-urls/pkg/url_shortner"
@@ -50,13 +51,14 @@ func (s *shortUrls) CreateShortUrl(ctx context.Context, urlString string) (*mode
 
 	shortUrl := url_shortner.New().GetShortUrl(urlIdentifier)
 
+	srtUrl.ID = primitive.NewObjectIDFromTimestamp(time.Now())
 	srtUrl.Url = urlString
 	srtUrl.NewUrl = shortUrl
 	srtUrl.UrlIdentifier = urlIdentifier
 	srtUrl.Status = 1 //default status active
 	srtUrl.CreatedAt = time.Now()
 	srtUrl.ExpireTime = time.Now().Add(time.Duration(config.GetConf().ShortUrlExpiryTime) * time.Hour)
-	srtUrl.CreatedBy = "" //todo get the user id from access-token
+	srtUrl.CreatedBy = fmt.Sprintf("%v", ctx.Value("user_id"))
 
 	res, err := collection.InsertOne(ctx, srtUrl)
 	if err != nil {
@@ -76,8 +78,7 @@ func (s *shortUrls) GetAllShortUrls(ctx context.Context) ([]models.ShortUrl, err
 	ctx1, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	//todo add created by user where condition
-	cur, err := collection.Find(ctx1, bson.D{})
+	cur, err := collection.Find(ctx1, bson.D{{"created_by", ctx.Value("user_id").(string)}})
 	if err != nil {
 		log.Println("Error fetching all short urls")
 		return res, err
@@ -114,7 +115,7 @@ func (s *shortUrls) UpdateShortUrls(ctx context.Context, shortUrlId string, shor
 	}
 
 	//updating status only as of now
-	filter := bson.D{{"_id", objectId}}
+	filter := bson.D{{"_id", objectId}, {"created_by", ctx.Value("user_id")}}
 	res, err := collection.UpdateOne(ctx1, filter, bson.D{{"$set", bson.D{{"status", shortUrl.Status}}}})
 
 	if err != nil {
@@ -164,7 +165,7 @@ func (s *shortUrls) DeleteShortUrl(ctx context.Context, srtUrlId string) error {
 		return err
 	}
 
-	filter := bson.D{{"_id", id}}
+	filter := bson.D{{"_id", id}, {"created_by", ctx.Value("user_id")}}
 	res, err := collection.DeleteOne(ctx1, filter)
 	if err != nil {
 		log.Printf("Error in deleting short url details for short url id %s", srtUrlId)
