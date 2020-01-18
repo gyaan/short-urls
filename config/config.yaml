@@ -1,0 +1,8 @@
+application_port: ":1334"
+mongo_db_connection_url: "mongodb://localhost:27017"
+mongo_database_name: "my_project"
+short_url_expiry_time: 72 # in hours ie 3 days
+base_url: "http://localhsot:1334/"
+minimum_short_url_identifier: 1
+jwt_secret: "+,g~9Ywa8)7D<nbR"
+token_expiry_time: 432000 # in second ie. 5 days

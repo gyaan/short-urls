@@ -2,7 +2,7 @@ package repositories
 
 import (
 	"context"
-	"github.com/gyaan/short-urls/config"
+	"github.com/gyaan/short-urls/internal/config"
 	"github.com/gyaan/short-urls/internal/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -16,10 +16,12 @@ type counters struct {
 	mongoClient *mongo.Client
 }
 
+//Counters
 type Counters interface {
 	UpdateAndGetCounter(ctx context.Context, counter string) (int64,error)
 }
 
+//NewCounterRepository
 func NewCounterRepository(client *mongo.Client) Counters {
 	return &counters{mongoClient: client}
 }

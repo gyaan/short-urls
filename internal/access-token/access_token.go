@@ -3,7 +3,7 @@ package access_token
 import (
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
-	"github.com/gyaan/short-urls/config"
+	"github.com/gyaan/short-urls/internal/config"
 	"log"
 	"time"
 )

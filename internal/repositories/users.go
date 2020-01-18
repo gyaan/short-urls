@@ -3,7 +3,7 @@ package repositories
 import (
 	"context"
 	"fmt"
-	"github.com/gyaan/short-urls/config"
+	"github.com/gyaan/short-urls/internal/config"
 	"github.com/gyaan/short-urls/internal/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"

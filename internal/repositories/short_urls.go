@@ -2,7 +2,7 @@ package repositories
 
 import (
 	"context"
-	"github.com/gyaan/short-urls/config"
+	"github.com/gyaan/short-urls/internal/config"
 	"github.com/gyaan/short-urls/internal/models"
 	"github.com/gyaan/short-urls/pkg/url_shortner"
 	"go.mongodb.org/mongo-driver/bson"
@@ -13,9 +13,11 @@ import (
 )
 
 type shortUrls struct {
-	mongoClient *mongo.Client
+	mongoClient       *mongo.Client
+	counterRepository Counters
 }
 
+//ShortUrls
 type ShortUrls interface {
 	CreateShortUrl(ctx context.Context, urlString string) (*models.ShortUrl, error)
 	GetAShortUrl(ctx context.Context, shortUrlId string) (*models.ShortUrl, error)
@@ -26,9 +28,10 @@ type ShortUrls interface {
 }
 
 // NewShortUrlRepository creates new repositories for short urls
-func NewShortUrlRepository(client *mongo.Client) ShortUrls {
+func NewShortUrlRepository(client *mongo.Client, counterRepository Counters) ShortUrls {
 	return &shortUrls{
-		mongoClient: client,
+		mongoClient:       client,
+		counterRepository: counterRepository,
 	}
 }
 
@@ -37,10 +40,9 @@ func (s *shortUrls) CreateShortUrl(ctx context.Context, urlString string) (*mode
 
 	var srtUrl models.ShortUrl
 	collection := s.mongoClient.Database(config.GetConf().MongoDatabaseName).Collection("short_urls")
-	counterRepository := NewCounterRepository(s.mongoClient)
-	urlIdentifier, err := counterRepository.UpdateAndGetCounter(ctx, "url_identifier")
+	urlIdentifier, err := s.counterRepository.UpdateAndGetCounter(ctx, "url_identifier")
 
-	log.Printf("New url identifier %d",urlIdentifier)
+	log.Printf("New url identifier %d", urlIdentifier)
 	if err != nil {
 		log.Printf("Error with getting current sequence of url_identifier")
 		return nil, err
@@ -67,6 +69,8 @@ func (s *shortUrls) CreateShortUrl(ctx context.Context, urlString string) (*mode
 
 //GetAllShortUrls returns all short urls
 func (s *shortUrls) GetAllShortUrls(ctx context.Context) ([]models.ShortUrl, error) {
+	log.Println("Get all short urls")
+
 	var res []models.ShortUrl
 	collection := s.mongoClient.Database(config.GetConf().MongoDatabaseName).Collection("short_urls")
 	ctx1, cancel := context.WithTimeout(context.Background(), 10*time.Second)
