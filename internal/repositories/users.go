@@ -19,9 +19,9 @@ type users struct {
 //Users
 type Users interface {
 	CreateUser(ctx context.Context, user models.User) (*models.User, error)
-	UpdateUser(ctx context.Context, userId string, user models.User) error
+	UpdateUser(ctx context.Context, userId string, user *models.User) error
 	GetUserDetailsByName(ctx context.Context, name string) (*models.User, error)
-	GetUserDetailsById(ctx context.Context, name string) (*models.User, error)
+	GetUserDetailsById(ctx context.Context, userId string) (*models.User, error)
 }
 
 //NewUserRepository
@@ -45,7 +45,7 @@ func (u *users) CreateUser(ctx context.Context, user models.User) (*models.User,
 }
 
 //UpdateUser updates a user
-func (u *users) UpdateUser(ctx context.Context, userId string, user models.User) error {
+func (u *users) UpdateUser(ctx context.Context, userId string, user *models.User) error {
 
 	collection := u.mongoClient.Database(config.GetConf().MongoDatabaseName).Collection("users")
 	ctx1, _ := context.WithTimeout(context.Background(), 30*time.Second)

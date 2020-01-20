@@ -62,21 +62,21 @@ func (h *handler) CreateShortUrl(w http.ResponseWriter, r *http.Request) {
 
 //GetAShortUrl returns a single url details using url id
 func (h *handler) GetAShortUrl(w http.ResponseWriter, r *http.Request) {
-
 	shortUrlId := chi.URLParam(r, "short_url_id")
 	log.Printf("Get short url details for %s", shortUrlId)
+	errResponse := models.ErrorResponse{ErrorMessage: "error fetching short url details", Retry: false}
 
 	srtUrl, err := h.shortUrlRepository.GetAShortUrl(r.Context(), shortUrlId)
 	if err != nil {
-		log.Printf("Error fetching short url details for %s", shortUrlId)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Printf("Error fetching short url details for %s, %v", shortUrlId, err)
+		http.Error(w, errResponse.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	bytes, err := json.Marshal(srtUrl)
 	if err != nil {
-		log.Printf("Error json marshaling for short url %v", srtUrl)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Printf("Error json marshaling for short url %v,%v", srtUrl, err)
+		http.Error(w, errResponse.Error(), http.StatusInternalServerError)
 		return
 	}
 	w.WriteHeader(http.StatusOK)
@@ -86,17 +86,18 @@ func (h *handler) GetAShortUrl(w http.ResponseWriter, r *http.Request) {
 //GetAllShortUrl returns all urls
 func (h *handler) GetAllShortUrl(w http.ResponseWriter, r *http.Request) {
 	srtUrls, err := h.shortUrlRepository.GetAllShortUrls(r.Context())
+	errResponse := models.ErrorResponse{ErrorMessage: "error fetching all short url details", Retry: false}
 
 	if err != nil {
-		log.Printf("Error feching all short url details")
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Printf("Error feching all short url details %v", err)
+		http.Error(w, errResponse.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	bytes, err := json.Marshal(srtUrls)
 	if err != nil {
-		log.Printf("Error marshaling all short url response")
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Printf("Error marshaling all short url response %v", err)
+		http.Error(w, errResponse.Error(), http.StatusInternalServerError)
 	}
 	w.WriteHeader(http.StatusOK)
 	fmt.Fprint(w, string(bytes))
@@ -107,9 +108,11 @@ func (h *handler) DeleteShortUrl(w http.ResponseWriter, r *http.Request) {
 
 	shortUrlId := chi.URLParam(r, "short_url_id")
 	err := h.shortUrlRepository.DeleteShortUrl(r.Context(), shortUrlId)
+	errResponse := models.ErrorResponse{ErrorMessage: "error removing short urls", Retry: false}
 
 	if err != nil {
-		log.Printf("Error deleting shor url for id %s", shortUrlId)
+		log.Printf("Error deleting shor url for id %s, %v", shortUrlId, err)
+		http.Error(w, errResponse.Error(), http.StatusInternalServerError)
 	}
 	w.WriteHeader(http.StatusOK)
 	fmt.Fprint(w, "successfully deleted short url entry")
@@ -119,12 +122,13 @@ func (h *handler) DeleteShortUrl(w http.ResponseWriter, r *http.Request) {
 func (h *handler) UpdateShortUrl(w http.ResponseWriter, r *http.Request) {
 	var srtUrlUpdateRequest UpdateShortUrlRequest
 
+	errResponse := models.ErrorResponse{ErrorMessage: "error updating short url", Retry: false}
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&srtUrlUpdateRequest)
 
 	if err != nil {
-		log.Printf("Error with update short url request")
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		log.Printf("Error with update short url request %v", err)
+		http.Error(w, errResponse.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -132,8 +136,8 @@ func (h *handler) UpdateShortUrl(w http.ResponseWriter, r *http.Request) {
 	err = h.shortUrlRepository.UpdateShortUrls(r.Context(), shortUrlId, models.ShortUrl{Status: int32(srtUrlUpdateRequest.Status)})
 
 	if err != nil {
-		log.Printf("Error updating short url details for short url id %v", shortUrlId)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Printf("Error updating short url details for short url id %v,%v", shortUrlId, err)
+		http.Error(w, errResponse.Error(), http.StatusInternalServerError)
 	}
 
 	w.WriteHeader(http.StatusOK)
@@ -146,7 +150,6 @@ func (h *handler) RedirectToActualUrl(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Redirecting to actual url for short url %s", vars["short_url"])
 
 	shortUrl, err := h.shortUrlRepository.GetActualUrlOfAShortUrl(r.Context(), vars["short_url"])
-
 	if err != nil {
 		log.Printf("Error with url redirection for short url %s", vars["short_url"])
 		http.Error(w, err.Error(), http.StatusInternalServerError)

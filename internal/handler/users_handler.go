@@ -2,7 +2,6 @@ package handler
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/gyaan/short-urls/internal/models"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -30,29 +29,34 @@ type UpdateUserRequest struct {
 //RegisterUser creates a new user
 func (h *handler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 	var createUserRequest CreateUserRequest
+	errResponse := models.ErrorResponse{ErrorMessage: "error in registering user", Retry: false}
 
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&createUserRequest)
 
 	if err != nil {
-		log.Println("Error with create user request")
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		log.Printf("error with create user request %v", err)
+		http.Error(w, errResponse.Error(), http.StatusBadRequest)
 		return
 	}
 
-	//todo validate all the required fields
+	if len(createUserRequest.Name) == 0 || len(createUserRequest.Password) == 0 || len(createUserRequest.Email) == 0 || len(createUserRequest.ConfirmPassword) == 0 {
+		errResponse.ErrorMessage = "name, email, password and confirm password are required fields."
+		http.Error(w, errResponse.Error(), http.StatusBadRequest)
+		return
+	}
+
 	if createUserRequest.Password != createUserRequest.ConfirmPassword {
-		err = errors.New("password and confirm password aren't same")
-		log.Printf("Password and confirm password aren't same")
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		errResponse.ErrorMessage = "password and confirm password should be same."
+		http.Error(w, errResponse.Error(), http.StatusBadRequest)
 		return
 	}
 
 	//get password hash
 	password, err := bcrypt.GenerateFromPassword([]byte(createUserRequest.Password), bcrypt.MinCost)
 	if err != nil {
-		log.Printf("Error getting  password hash")
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Printf("error getting  password hash %v", err)
+		http.Error(w, errResponse.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -63,17 +67,16 @@ func (h *handler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 		Password: string(password),
 		Status:   1,
 	})
-
 	if err != nil {
-		log.Printf("Error in create new user")
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Printf("Error in create new user in database %v", err)
+		http.Error(w, errResponse.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	bytes, err := json.Marshal(user)
 	if err != nil {
-		log.Printf("Error marshaling user details")
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Printf("Error marshaling user details %v", err)
+		http.Error(w, errResponse.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -84,36 +87,61 @@ func (h *handler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 //UpdateUser updates existing user
 func (h *handler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	var updateUserRequest UpdateUserRequest
+	errResponse := models.ErrorResponse{ErrorMessage: "error in updating user details", Retry: false}
 
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&updateUserRequest)
 
 	if err != nil {
-		log.Printf("Error with update user request")
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		log.Printf("Error with update user request %v", err)
+		http.Error(w, errResponse.Error(), http.StatusBadRequest)
 		return
 	}
 
 	userId := fmt.Sprintf("%v", r.Context().Value("user_id"))
+	if len(userId) == 0 {
+		log.Printf("user id isn't in context!")
+		http.Error(w, errResponse.Error(), http.StatusBadRequest)
+		return
+	}
 
 	//get password hash
 	password, err := bcrypt.GenerateFromPassword([]byte(updateUserRequest.Password), bcrypt.MinCost)
 	if err != nil {
-		log.Printf("Error generating password hash")
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Printf("Error generating password hash %v", err)
+		http.Error(w, errResponse.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	//todo update only if field available
-	err = h.userRepository.UpdateUser(r.Context(), userId, models.User{
-		Status:   updateUserRequest.Status,
-		Password: string(password),
-		Email:    updateUserRequest.Email,
-	})
+	//lets say only password,status and email can be changes
+	//get existing user details
+	existingUser, err := h.userRepository.GetUserDetailsById(r.Context(), userId)
 
 	if err != nil {
-		log.Printf("Error updating user details for %s", userId)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Printf("Error getting exising user details %v", err)
+		http.Error(w, errResponse.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	//update only there is email in request
+	if len(updateUserRequest.Email) > 0 {
+		existingUser.Email = updateUserRequest.Email
+	}
+
+	//update only if status is different
+	if updateUserRequest.Status != existingUser.Status {
+		existingUser.Status = updateUserRequest.Status
+	}
+
+	//update only if there is password
+	if len(updateUserRequest.Password) > 0 {
+		existingUser.Password = string(password)
+	}
+
+	err = h.userRepository.UpdateUser(r.Context(), userId, existingUser)
+	if err != nil {
+		log.Printf("Error updating user details for %s, %v", userId, err)
+		http.Error(w, errResponse.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -124,18 +152,19 @@ func (h *handler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 func (h *handler) GetUser(w http.ResponseWriter, r *http.Request) {
 
 	userId := fmt.Sprintf("%v", r.Context().Value("user_id"))
+	errResponse := models.ErrorResponse{ErrorMessage: "error in fetching user details", Retry: false}
 
 	//get user details
 	user, err := h.userRepository.GetUserDetailsById(r.Context(), userId)
 	if err != nil {
-		log.Printf("error fetching user details")
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		log.Printf("error fetching user details %v", err)
+		http.Error(w, errResponse.Error(), http.StatusBadRequest)
 		return
 	}
 	bytes, err := json.Marshal(user)
 	if err != nil {
-		log.Printf("Error marshaling user details")
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Printf("Error marshaling user details, %v", err)
+		http.Error(w, errResponse.Error(), http.StatusInternalServerError)
 		return
 	}
 

@@ -2,9 +2,9 @@ package handler
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/gyaan/short-urls/internal/access-token"
+	"github.com/gyaan/short-urls/internal/models"
 	"golang.org/x/crypto/bcrypt"
 	"log"
 	"net/http"
@@ -24,20 +24,19 @@ type AccessTokenResponse struct {
 
 //GetAccessToken returns the access token after user verification
 func (h *handler) GetAccessToken(w http.ResponseWriter, r *http.Request) {
-	//verify user credentials and release access access-token
-
 	var accessTokenRequest AccessTokenRequest
 	err := json.NewDecoder(r.Body).Decode(&accessTokenRequest)
+	errResponse := models.ErrorResponse{ErrorMessage: "error in generating access token", Retry: false}
 
 	if err != nil {
-		log.Println("Error decoding get access access-token request")
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		log.Printf("error decoding get access access-token request %v", err)
+		http.Error(w, errResponse.Error(), http.StatusBadRequest)
 		return
 	}
 
 	if len(accessTokenRequest.Password) <= 0 || len(accessTokenRequest.Name) <= 0 {
-		log.Printf("access access-token request without name and password")
-		http.Error(w, errors.New("access access-token request without name and password").Error(), http.StatusBadRequest)
+		errResponse.ErrorMessage = "name and password are required to generate access token"
+		http.Error(w, errResponse.Error(), http.StatusBadRequest)
 		return
 	}
 	log.Printf("Generating access-token for %s", accessTokenRequest.Name)
@@ -45,23 +44,25 @@ func (h *handler) GetAccessToken(w http.ResponseWriter, r *http.Request) {
 	//get user details
 	user, err := h.userRepository.GetUserDetailsByName(r.Context(), accessTokenRequest.Name)
 	if user == nil {
-		log.Printf("wrong credentials for access access-token")
-		http.Error(w, errors.New("wrong credentials for access access-token").Error(), http.StatusBadRequest)
+		log.Printf("wrong credentials for access access-token %v", err)
+		errResponse.ErrorMessage = "user not found."
+		http.Error(w, errResponse.Error(), http.StatusBadRequest)
 		return
 	}
 
 	//compare password
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(accessTokenRequest.Password))
 	if err != nil {
-		log.Printf("wrong credentials for access access-token")
-		http.Error(w, errors.New("wrong credentials for access access-token").Error(), http.StatusBadRequest)
+		log.Printf("wrong credentials for access access-token, %v", err)
+		errResponse.ErrorMessage = "wrong username password."
+		http.Error(w, errResponse.Error(), http.StatusBadRequest)
 		return
 	}
 
 	tokenString, err := access_token.GetToken(user.ID.Hex())
 	if err != nil {
-		log.Printf("error in access access-token generation")
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		log.Printf("error in access access-token generation %v", err)
+		http.Error(w, errResponse.Error(), http.StatusBadRequest)
 		return
 	}
 	accessTokenRes := AccessTokenResponse{
@@ -71,8 +72,8 @@ func (h *handler) GetAccessToken(w http.ResponseWriter, r *http.Request) {
 
 	bytes, err := json.Marshal(accessTokenRes)
 	if err != nil {
-		log.Printf("error marshaling jwt access-token response")
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Printf("error marshaling jwt access-token response %v", err)
+		http.Error(w, errResponse.Error(), http.StatusInternalServerError)
 		return
 	}
 
