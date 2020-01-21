@@ -3,7 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/gyaan/short-urls/internal/access-token"
+	"github.com/gyaan/short-urls/internal/access_token"
 	"github.com/gyaan/short-urls/internal/models"
 	"golang.org/x/crypto/bcrypt"
 	"log"

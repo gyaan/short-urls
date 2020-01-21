@@ -26,6 +26,7 @@ type ShortUrls interface {
 	UpdateShortUrls(ctx context.Context, shortUrlId string, url models.ShortUrl) error
 	DeleteShortUrl(ctx context.Context, shortUrlId string) error
 	GetActualUrlOfAShortUrl(ctx context.Context, shortUrl string) (*models.ShortUrl, error)
+	IncrementClickCountOfShortUrl(ctx context.Context, shortUrl string) error
 }
 
 // NewShortUrlRepository creates new repositories for short urls
@@ -195,4 +196,23 @@ func (s *shortUrls) GetActualUrlOfAShortUrl(ctx context.Context, shortUrl string
 	}
 
 	return &srtUrl, nil
+}
+
+//IncrementClickCountOfShortUrl increase clicks count for a url after clicking it
+func (s *shortUrls) IncrementClickCountOfShortUrl(ctx context.Context, shortUrl string) error {
+	collection := s.mongoClient.Database(config.GetConf().MongoDatabaseName).Collection("short_urls")
+	ctx1, cancel := context.WithTimeout(ctx, 10*time.Second)
+	defer cancel()
+
+	//updating status only as of now
+	filter := bson.D{{"new_url", shortUrl}}
+	res, err := collection.UpdateOne(ctx1, filter, bson.D{{"$inc", bson.D{{"clicks_count", 1}}}})
+
+	if err != nil {
+		log.Printf("Error increasing click count for short url id %s", shortUrl)
+		return err
+	}
+
+	log.Printf("successfully increased short urls clicks count %d", res.MatchedCount)
+	return nil
 }

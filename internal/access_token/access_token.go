@@ -35,7 +35,7 @@ func GetToken(UserId string) (string, error) {
 	//get token string
 	tokenString, err := token.SignedString([]byte(config.GetConf().JWTSecret))
 	if err != nil {
-		log.Printf("error generating access access-token")
+		log.Printf("error generating access access_token")
 		return "", err
 	}
 

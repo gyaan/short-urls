@@ -31,11 +31,11 @@ func TestNew(t *testing.T) {
 func Test_getCharMap(t *testing.T) {
 	tests := []struct {
 		name string
-		want map[int]string
+		want map[int64]string
 	}{
 		{
 			name: "valid",
-			want: map[int]string{
+			want: map[int64]string{
 				0:  "a",
 				1:  "b",
 				2:  "c",

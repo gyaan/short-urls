@@ -2,8 +2,8 @@ package middleware
 
 import (
 	"context"
-	"errors"
-	"github.com/gyaan/short-urls/internal/access-token"
+	"github.com/gyaan/short-urls/internal/access_token"
+	"github.com/gyaan/short-urls/internal/models"
 	"log"
 	"net/http"
 	"strings"
@@ -12,25 +12,29 @@ import (
 // Authenticate validate access token passed in request
 func Authenticate(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		errResponse := models.ErrorResponse{ErrorMessage: "Error with access token.", Retry: false}
 		reqToken := r.Header.Get("Authorization")
 
 		//check if authorization code is there or not
 		if len(reqToken) == 0 {
-			http.Error(w, errors.New("unauthorized access").Error(), http.StatusBadRequest)
+			errResponse.ErrorMessage = "unauthorized access"
+			http.Error(w, errResponse.Error(), http.StatusBadRequest)
 			return
 		}
 
 		splitToken := strings.Split(reqToken, "Bearer")
 		if len(splitToken) != 2 {
-			http.Error(w, errors.New("invalid bearer authorization access-token 1").Error(), http.StatusBadRequest)
+			errResponse.ErrorMessage = "invalid bearer authorization access token."
+			http.Error(w, errResponse.Error(), http.StatusBadRequest)
 			return
 		}
 		reqToken = strings.TrimSpace(splitToken[1])
 		claims, err := access_token.ValidateToken(reqToken)
 
 		if err != nil {
-			log.Println("error in access-token validation")
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			log.Println("error in access token validation")
+			errResponse.ErrorMessage = "error in access token validation"
+			http.Error(w, errResponse.Error(), http.StatusInternalServerError)
 			return
 		}
 

@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/go-chi/chi"
-	"github.com/gorilla/mux"
 	"github.com/gyaan/short-urls/internal/models"
 	"github.com/gyaan/short-urls/pkg/url"
 	"log"
@@ -146,12 +145,12 @@ func (h *handler) UpdateShortUrl(w http.ResponseWriter, r *http.Request) {
 
 //RedirectToActualUrl redirect short urls to actual url
 func (h *handler) RedirectToActualUrl(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	log.Printf("Redirecting to actual url for short url %s", vars["short_url"])
+	srtUrl := chi.URLParam(r, "short_url")
+	log.Printf("Redirecting to actual url for short url %s", srtUrl)
 
-	shortUrl, err := h.shortUrlRepository.GetActualUrlOfAShortUrl(r.Context(), vars["short_url"])
+	shortUrl, err := h.shortUrlRepository.GetActualUrlOfAShortUrl(r.Context(), srtUrl)
 	if err != nil {
-		log.Printf("Error with url redirection for short url %s", vars["short_url"])
+		log.Printf("Error with url redirection for short url %s", srtUrl)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -159,6 +158,11 @@ func (h *handler) RedirectToActualUrl(w http.ResponseWriter, r *http.Request) {
 	redirectUrl := shortUrl.Url
 	if !strings.Contains(shortUrl.Url, "http") { //todo move this to url validation
 		redirectUrl = "http://" + redirectUrl
+	}
+	//update click count
+	err = h.shortUrlRepository.IncrementClickCountOfShortUrl(r.Context(), srtUrl)
+	if err != nil { //just log the error
+		fmt.Printf("Error increasing clicks count %v", err)
 	}
 
 	http.Redirect(w, r, redirectUrl, http.StatusSeeOther)
