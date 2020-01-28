@@ -31,35 +31,44 @@ type Config struct {
 
 // NewConfig returns creates new application config
 func New() *Config {
-	viper.SetConfigType("yaml")
-	viper.AddConfigPath(basePath + "/config")
-	viper.SetConfigName("config")
-	err := viper.ReadInConfig()
-	if err != nil {
-		fmt.Printf("%v", err)
-	}
 
-	err = viper.Unmarshal(&conf)
-	if err != nil {
-		log.Fatalf("%v", err)
-	}
+	v := viper.New()
 
 	//set mongo env variable default config values will overwrite with env variable
-	err = viper.BindEnv("mongo_database_name", "MONGO_INITDB_DATABASE")
+	err := v.BindEnv("mongo_database_name", "MONGO_INITDB_DATABASE")
 	if err != nil {
 		log.Printf("not able to set env variable for mongo_database_name %v", err)
 	}
 
-	err = viper.BindEnv("mongo_database_username", "MONGO_INITDB_ROOT_USERNAME")
+	err = v.BindEnv("mongo_database_username", "MONGO_INITDB_ROOT_USERNAME")
 	if err != nil {
 		log.Printf("not able to set env variable for mongo_database_username %v", err)
 	}
 
-	err = viper.BindEnv("mongo_database_password", "MONGO_INITDB_ROOT_PASSWORD")
+	err = v.BindEnv("mongo_database_password", "MONGO_INITDB_ROOT_PASSWORD")
 	if err != nil {
 		log.Printf("not able to set env variable for mongo_database_password %v", err)
 	}
 
+	err = v.BindEnv("mongo_db_connection_url", "MONGO_HOST")
+	if err != nil {
+		log.Printf("not able to set env variable for mongo_db_connection_url %v", err)
+	}
+
+	v.SetConfigType("yaml")
+	v.AddConfigPath(basePath + "/config")
+	v.SetConfigName("config")
+	err = v.ReadInConfig()
+	if err != nil {
+		fmt.Printf("%v", err)
+	}
+
+	err = v.Unmarshal(&conf)
+	if err != nil {
+		log.Fatalf("%v", err)
+	}
+
+	log.Printf("%v", conf)
 	return conf
 }
 

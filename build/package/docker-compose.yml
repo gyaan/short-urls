@@ -6,6 +6,11 @@ services:
       dockerfile: Dockerfile
     ports:
       - '1334:1334'
+    environment:
+      - MONGO_INITDB_DATABASE=short_urls
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=admin
+      - MONGO_HOST=mongodb://admin:admin@database:27017/short_urls
   web:
     build:
       context: ../../web
@@ -21,8 +26,9 @@ services:
     image: 'mongo'
     environment:
       - MONGO_INITDB_DATABASE=short_urls
-      - MONGO_INITDB_ROOT_USERNAME="admin"
-      - MONGO_INITDB_ROOT_PASSWORD="admin"
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=admin
+      - MONGO_HOST=mongodb://admin:admin@database:27017/short_urls
     volumes:
       - ./init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
       - ./mongo-volume:/data/db
