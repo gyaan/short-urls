@@ -1,6 +1,8 @@
 application_port: ":1334"
 mongo_db_connection_url: "mongodb://localhost:27017"
-mongo_database_name: "my_project"
+mongo_database_name: "short_urls"
+mongo_database_username: "admin"
+mongo_database_password: "admin"
 short_url_expiry_time: 72 # in hours ie 3 days
 base_url: "http://localhsot:1334/"
 minimum_short_url_identifier: 1

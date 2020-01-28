@@ -1,15 +1,12 @@
-# base image
-FROM node:12.2.0-alpine
-
-# set working directory
+# Stage 1
+FROM node:8 as react-build
 WORKDIR /app
+COPY . ./
+RUN yarn
+RUN yarn build
 
-# add `/app/node_modules/.bin` to $PATH
-ENV PATH /app/node_modules/.bin:$PATH
-
-# install and cache app dependencies
-COPY package.json /app/package.json
-RUN npm install
-
-# start app
-CMD ["yarn", "serve"]
+# Stage 2 - the production environment
+FROM nginx:alpine
+COPY --from=react-build /app/build /usr/share/nginx/html
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
