@@ -3,6 +3,7 @@ package middleware
 import (
 	"context"
 	"github.com/gyaan/short-urls/internal/access_token"
+	"github.com/gyaan/short-urls/internal/config"
 	"github.com/gyaan/short-urls/internal/models"
 	"log"
 	"net/http"
@@ -29,7 +30,7 @@ func Authenticate(next http.Handler) http.Handler {
 			return
 		}
 		reqToken = strings.TrimSpace(splitToken[1])
-		claims, err := access_token.ValidateToken(reqToken)
+		claims, err := access_token.ValidateToken(reqToken,config.GetConf().JWTSecret)
 
 		if err != nil {
 			log.Println("error in access token validation")

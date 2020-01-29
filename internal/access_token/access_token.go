@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
-	"github.com/gyaan/short-urls/internal/config"
 	"log"
 	"time"
 )
@@ -17,10 +16,10 @@ type Claims struct {
 
 // GetToken returns a token for verified user
 // use this function after user verification
-func GetToken(UserId string) (string, error) {
+func GetToken(UserId string, tokenExpiryTime int64, jwtSecret string) (string, error) {
 
 	//set expiration time for token
-	expirationTime := time.Now().Add(time.Duration(config.GetConf().TokenExpiryTime) * time.Minute)
+	expirationTime := time.Now().Add(time.Duration(tokenExpiryTime) * time.Minute)
 
 	//create claim
 	claims := &Claims{
@@ -33,7 +32,7 @@ func GetToken(UserId string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
 	//get token string
-	tokenString, err := token.SignedString([]byte(config.GetConf().JWTSecret))
+	tokenString, err := token.SignedString([]byte(jwtSecret))
 	if err != nil {
 		log.Printf("error generating access access_token")
 		return "", err
@@ -43,14 +42,14 @@ func GetToken(UserId string) (string, error) {
 }
 
 // ValidateToken validate a access token and return claims
-func ValidateToken(tokenString string) (map[string]interface{}, error) {
+func ValidateToken(tokenString string, jwtSecret string) (map[string]interface{}, error) {
 
 	//parse token
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
-		return []byte(config.GetConf().JWTSecret), nil
+		return []byte(jwtSecret), nil
 	})
 
 	//error parsing token

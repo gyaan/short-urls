@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gyaan/short-urls/internal/access_token"
+	"github.com/gyaan/short-urls/internal/config"
 	"github.com/gyaan/short-urls/internal/models"
 	"golang.org/x/crypto/bcrypt"
 	"log"
@@ -59,7 +60,7 @@ func (h *handler) GetAccessToken(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tokenString, err := access_token.GetToken(user.ID.Hex())
+	tokenString, err := access_token.GetToken(user.ID.Hex(), config.GetConf().TokenExpiryTime, config.GetConf().JWTSecret)
 	if err != nil {
 		log.Printf("error in access access-token generation %v", err)
 		http.Error(w, errResponse.Error(), http.StatusBadRequest)
