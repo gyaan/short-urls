@@ -5,9 +5,10 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/gyaan/short-urls/internal/config"
 	"github.com/gyaan/short-urls/internal/handler"
-	mclient "github.com/gyaan/short-urls/internal/mongo-client"
+	mclient "github.com/gyaan/short-urls/internal/mongo_client"
 	"github.com/gyaan/short-urls/internal/repositories"
 	"github.com/gyaan/short-urls/internal/router"
+	"log"
 	"net/http"
 )
 
@@ -17,7 +18,11 @@ func main() {
 	conf := config.New()
 
 	//mongodb client
-	mClient := mclient.New()
+	mClient, err := mclient.New(conf.MongoDbConnectionUrl, conf.MongoContextTimeout)
+
+	if err != nil {
+		log.Fatalf("Error connecting mongodb")
+	}
 
 	//get repositories
 	counterRepository := repositories.NewCounterRepository(mClient)
@@ -34,7 +39,7 @@ func main() {
 	router.RegisterRoutes(h, r)
 
 	//start server
-	err := http.ListenAndServe(conf.ApplicationPort, r)
+	err = http.ListenAndServe(conf.ApplicationPort, r)
 
 	if err != nil {
 		fmt.Println("Error:", err.Error())
