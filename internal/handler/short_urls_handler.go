@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"github.com/go-chi/chi"
 	"github.com/gyaan/short-urls/internal/models"
+	"github.com/gyaan/short-urls/pkg/pagination"
 	"github.com/gyaan/short-urls/pkg/url"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 )
 
@@ -84,16 +86,57 @@ func (h *handler) GetAShortUrl(w http.ResponseWriter, r *http.Request) {
 
 //GetAllShortUrl returns all urls
 func (h *handler) GetAllShortUrl(w http.ResponseWriter, r *http.Request) {
-	srtUrls, err := h.shortUrlRepository.GetAllShortUrls(r.Context())
 	errResponse := models.ErrorResponse{ErrorMessage: "error fetching all short url details", Retry: false}
+	var srtUrls []models.ShortUrl
+	page := 1
+	limit := 10
+	pageString := r.URL.Query().Get("page")
 
+	if len(pageString) > 0 {
+		p, err := strconv.Atoi(pageString)
+		if err != nil {
+			log.Printf("Error parsing page url parameter %v", err)
+			http.Error(w, errResponse.Error(), http.StatusBadRequest)
+			return
+		}
+		page = p
+	}
+	limitString := r.URL.Query().Get("limit")
+
+	if len(limitString) > 0 {
+		l, err := strconv.Atoi(limitString)
+		if err != nil {
+			log.Printf("Error parsing limit url parameter %v", err)
+			http.Error(w, errResponse.Error(), http.StatusBadRequest)
+			return
+		}
+		limit = l
+	}
+
+	//get count of short urls for requested user
+	count, err := h.shortUrlRepository.GetTotalShortUrlsCount(r.Context())
 	if err != nil {
-		log.Printf("Error feching all short url details %v", err)
+		log.Printf("Error parsing limit url parameter %v", err)
 		http.Error(w, errResponse.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	bytes, err := json.Marshal(srtUrls)
+	//query only if there is short urls
+	if count > 0 {
+		//offset to fetch the elements
+		offset := limit * (page - 1)
+		su, err := h.shortUrlRepository.GetAllShortUrls(r.Context(), offset, limit)
+
+		if err != nil {
+			log.Printf("Error feching all short url details %v", err)
+			http.Error(w, errResponse.Error(), http.StatusInternalServerError)
+			return
+		}
+		srtUrls = su
+	}
+	paginationObj := pagination.New(count, int64(page), srtUrls, limit)
+	response, err := paginationObj.GetPagination()
+	bytes, err := json.Marshal(response)
 	if err != nil {
 		log.Printf("Error marshaling all short url response %v", err)
 		http.Error(w, errResponse.Error(), http.StatusInternalServerError)

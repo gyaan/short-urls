@@ -9,6 +9,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
 	"time"
 )
@@ -22,11 +23,12 @@ type shortUrls struct {
 type ShortUrls interface {
 	CreateShortUrl(ctx context.Context, urlString string) (*models.ShortUrl, error)
 	GetAShortUrl(ctx context.Context, shortUrlId string) (*models.ShortUrl, error)
-	GetAllShortUrls(ctx context.Context) ([]models.ShortUrl, error)
+	GetAllShortUrls(ctx context.Context, page int, limit int) ([]models.ShortUrl, error)
 	UpdateShortUrls(ctx context.Context, shortUrlId string, url models.ShortUrl) error
 	DeleteShortUrl(ctx context.Context, shortUrlId string) error
 	GetActualUrlOfAShortUrl(ctx context.Context, shortUrl string) (*models.ShortUrl, error)
 	IncrementClickCountOfShortUrl(ctx context.Context, shortUrl string) error
+	GetTotalShortUrlsCount(ctx context.Context) (int64, error)
 }
 
 // NewShortUrlRepository creates new repositories for short urls
@@ -71,7 +73,7 @@ func (s *shortUrls) CreateShortUrl(ctx context.Context, urlString string) (*mode
 }
 
 //GetAllShortUrls returns all short urls
-func (s *shortUrls) GetAllShortUrls(ctx context.Context) ([]models.ShortUrl, error) {
+func (s *shortUrls) GetAllShortUrls(ctx context.Context, offset int, limit int) ([]models.ShortUrl, error) {
 	log.Println("Get all short urls")
 
 	var res []models.ShortUrl
@@ -79,7 +81,10 @@ func (s *shortUrls) GetAllShortUrls(ctx context.Context) ([]models.ShortUrl, err
 	ctx1, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	cur, err := collection.Find(ctx1, bson.D{{"created_by", ctx.Value("user_id").(string)}})
+	findOptions := options.Find()
+	findOptions.SetLimit(int64(limit))
+	findOptions.SetSkip(int64(offset))
+	cur, err := collection.Find(ctx1, bson.D{{"created_by", ctx.Value("user_id").(string)}}, findOptions)
 	if err != nil {
 		log.Println("Error fetching all short urls")
 		return res, err
@@ -99,8 +104,6 @@ func (s *shortUrls) GetAllShortUrls(ctx context.Context) ([]models.ShortUrl, err
 		log.Println("Error get all short urls cursor")
 		return res, err
 	}
-
-	//todo add paginated response
 	return res, nil
 }
 
@@ -116,7 +119,7 @@ func (s *shortUrls) UpdateShortUrls(ctx context.Context, shortUrlId string, shor
 	}
 
 	//updating status only as of now
-	filter := bson.D{{"_id", objectId},{"created_by",ctx.Value("user_id")}}
+	filter := bson.D{{"_id", objectId}, {"created_by", ctx.Value("user_id")}}
 	res, err := collection.UpdateOne(ctx1, filter, bson.D{{"$set", bson.D{{"status", shortUrl.Status}}}})
 
 	if err != nil {
@@ -166,7 +169,7 @@ func (s *shortUrls) DeleteShortUrl(ctx context.Context, srtUrlId string) error {
 		return err
 	}
 
-	filter := bson.D{{"_id", id},{"created_by",ctx.Value("user_id")}}
+	filter := bson.D{{"_id", id}, {"created_by", ctx.Value("user_id")}}
 	res, err := collection.DeleteOne(ctx1, filter)
 	if err != nil {
 		log.Printf("Error in deleting short url details for short url id %s", srtUrlId)
@@ -215,4 +218,21 @@ func (s *shortUrls) IncrementClickCountOfShortUrl(ctx context.Context, shortUrl 
 
 	log.Printf("successfully increased short urls clicks count %d", res.MatchedCount)
 	return nil
+}
+
+//GetTotalShortUrlsCount returns count for a user
+func (s *shortUrls) GetTotalShortUrlsCount(ctx context.Context) (int64, error) {
+
+	log.Println("Get short urls count for a user")
+	collection := s.mongoClient.Database(config.GetConf().MongoDatabaseName).Collection("short_urls")
+	ctx1, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	count, err := collection.CountDocuments(ctx1, bson.D{{"created_by", ctx.Value("user_id").(string)}})
+
+	if err != nil {
+		return 0, err
+	}
+
+	return count, nil
 }
