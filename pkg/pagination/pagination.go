@@ -25,6 +25,7 @@ type Pagination interface {
 	GetPreviousPage() int64
 }
 
+//New pagination
 func New(totalItem int64, currentPage int64, data interface{}, perPageItem int) Pagination {
 	return &page{
 		currentPage: currentPage,
@@ -34,6 +35,7 @@ func New(totalItem int64, currentPage int64, data interface{}, perPageItem int) 
 	}
 }
 
+//GetPagination returns paginated response
 func (p *page) GetPagination() (Response, error) {
 	response := Response{}
 	response.CurrentPage = p.currentPage
@@ -49,13 +51,23 @@ func (p *page) GetPagination() (Response, error) {
 	return response, nil
 }
 
+//GetLastPage returns last page
 func (p *page) GetLastPage() (int64, error) {
 	if p.perPageItem <= 0 {
 		return 0, errors.New("per page item can't be zero or less then zero")
 	}
-	return (p.totalItem / int64(p.perPageItem))+1, nil
+
+	cal := p.totalItem / int64(p.perPageItem)
+
+	//corner case
+	if p.totalItem%int64(p.perPageItem) == 0 {
+		return cal, nil
+	}
+
+	return cal + 1, nil
 }
 
+//GetNextPage returns next page
 func (p *page) GetNextPage() int64 {
 	lastPage, _ := p.GetLastPage()
 	if p.currentPage >= lastPage {
@@ -64,6 +76,7 @@ func (p *page) GetNextPage() int64 {
 	return p.currentPage + 1
 }
 
+//GetPreviousPage return previous page
 func (p *page) GetPreviousPage() int64 {
 	if p.currentPage <= 1 {
 		return p.currentPage

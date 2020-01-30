@@ -23,7 +23,10 @@ func Test_page_GetPagination(t *testing.T) {
 			fields: fields{
 				currentPage: 2,
 				totalItem:   100,
-				data:        "hello world",
+				data: []struct{ name string }{
+					{name: "gyaneshwar"},
+					{name: "gyaan"},
+				},
 				perPageItem: 10,
 			},
 			want: Response{
@@ -31,8 +34,11 @@ func Test_page_GetPagination(t *testing.T) {
 				TotalItem:    100,
 				PreviousPage: 1,
 				NextPage:     3,
-				Data:         "hello world",
-				CurrentPage:  2,
+				Data: []struct{ name string }{
+					{name: "gyaneshwar"},
+					{name: "gyaan"},
+				},
+				CurrentPage: 2,
 			},
 			wantErr: false,
 		},
