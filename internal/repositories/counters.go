@@ -14,6 +14,7 @@ import (
 
 type counters struct {
 	mongoClient *mongo.Client
+	conf        *config.Config
 }
 
 //Counters
@@ -22,13 +23,13 @@ type Counters interface {
 }
 
 //NewCounterRepository
-func NewCounterRepository(client *mongo.Client) Counters {
-	return &counters{mongoClient: client}
+func NewCounterRepository(client *mongo.Client, config2 *config.Config) Counters {
+	return &counters{mongoClient: client, conf: config2}
 }
 
 //UpdateCounter increase sequence of a counter
 func (c counters) UpdateAndGetCounter(ctx context.Context, counterStr string) (int64, error) {
-	collection := c.mongoClient.Database(config.GetConf().MongoDatabaseName).Collection("counters")
+	collection := c.mongoClient.Database(c.conf.MongoDatabaseName).Collection("counters")
 	ctx1, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	var counter models.Counter
@@ -42,7 +43,7 @@ func (c counters) UpdateAndGetCounter(ctx context.Context, counterStr string) (i
 	if err != nil {
 		//still no row in the counter collection
 		//set initial sequence
-		counter.Sequence = int64(config.GetConf().MinimumShortUrlIdentifier)
+		counter.Sequence = int64(c.conf.MinimumShortUrlIdentifier)
 		counter.Name = counterStr
 		counter.ID = primitive.NewObjectIDFromTimestamp(time.Now())
 		_, err := collection.InsertOne(ctx1, counter)

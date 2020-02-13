@@ -1,5 +1,5 @@
 application_port: ":1334"
-mongo_db_connection_url: "mongodb://admin:admin@localhost:27017/short_urls"
+mongo_db_connection_url: "mongodb://localhost:27017/my_project"
 mongo_database_name: "short_urls"
 mongo_database_username: "admin"
 mongo_database_password: "admin"

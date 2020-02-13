@@ -97,17 +97,38 @@ func (_m *ShortUrls) GetActualUrlOfAShortUrl(ctx context.Context, shortUrl strin
 	return r0, r1
 }
 
-// GetAllShortUrls provides a mock function with given fields: ctx
-func (_m *ShortUrls) GetAllShortUrls(ctx context.Context) ([]models.ShortUrl, error) {
-	ret := _m.Called(ctx)
+// GetAllShortUrls provides a mock function with given fields: ctx, page, limit
+func (_m *ShortUrls) GetAllShortUrls(ctx context.Context, page int, limit int) ([]models.ShortUrl, error) {
+	ret := _m.Called(ctx, page, limit)
 
 	var r0 []models.ShortUrl
-	if rf, ok := ret.Get(0).(func(context.Context) []models.ShortUrl); ok {
-		r0 = rf(ctx)
+	if rf, ok := ret.Get(0).(func(context.Context, int, int) []models.ShortUrl); ok {
+		r0 = rf(ctx, page, limit)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]models.ShortUrl)
 		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, int, int) error); ok {
+		r1 = rf(ctx, page, limit)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetTotalShortUrlsCount provides a mock function with given fields: ctx
+func (_m *ShortUrls) GetTotalShortUrlsCount(ctx context.Context) (int64, error) {
+	ret := _m.Called(ctx)
+
+	var r0 int64
+	if rf, ok := ret.Get(0).(func(context.Context) int64); ok {
+		r0 = rf(ctx)
+	} else {
+		r0 = ret.Get(0).(int64)
 	}
 
 	var r1 error

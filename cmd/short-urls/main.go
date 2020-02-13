@@ -25,9 +25,9 @@ func main() {
 	}
 
 	//get repositories
-	counterRepository := repositories.NewCounterRepository(mClient)
-	shortUrlRepository := repositories.NewShortUrlRepository(mClient, counterRepository)
-	userRepository := repositories.NewUserRepository(mClient)
+	counterRepository := repositories.NewCounterRepository(mClient, conf)
+	shortUrlRepository := repositories.NewShortUrlRepository(mClient, counterRepository, conf)
+	userRepository := repositories.NewUserRepository(mClient, conf)
 
 	//get handler
 	h := handler.NewHandler(shortUrlRepository, userRepository)

@@ -14,6 +14,7 @@ import (
 
 type users struct {
 	mongoClient *mongo.Client
+	conf        *config.Config
 }
 
 //Users
@@ -25,15 +26,16 @@ type Users interface {
 }
 
 //NewUserRepository
-func NewUserRepository(client *mongo.Client) Users {
+func NewUserRepository(client *mongo.Client, config2 *config.Config) Users {
 	return &users{
 		mongoClient: client,
+		conf:        config2,
 	}
 }
 
 //RegisterUser creates new user
 func (u *users) CreateUser(ctx context.Context, user models.User) (*models.User, error) {
-	collection := u.mongoClient.Database(config.GetConf().MongoDatabaseName).Collection("users")
+	collection := u.mongoClient.Database(u.conf.MongoDatabaseName).Collection("users")
 	res, err := collection.InsertOne(ctx, user)
 
 	if err != nil {
@@ -47,7 +49,7 @@ func (u *users) CreateUser(ctx context.Context, user models.User) (*models.User,
 //UpdateUser updates a user
 func (u *users) UpdateUser(ctx context.Context, userId string, user *models.User) error {
 
-	collection := u.mongoClient.Database(config.GetConf().MongoDatabaseName).Collection("users")
+	collection := u.mongoClient.Database(u.conf.MongoDatabaseName).Collection("users")
 	ctx1, _ := context.WithTimeout(context.Background(), 30*time.Second)
 
 	id, err := primitive.ObjectIDFromHex(userId)
@@ -75,7 +77,7 @@ func (u *users) UpdateUser(ctx context.Context, userId string, user *models.User
 
 //GetUserDetails get user details for a name
 func (u *users) GetUserDetailsByName(ctx context.Context, name string) (*models.User, error) {
-	collection := u.mongoClient.Database(config.GetConf().MongoDatabaseName).Collection("users")
+	collection := u.mongoClient.Database(u.conf.MongoDatabaseName).Collection("users")
 	ctx1, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 	var user models.User
@@ -92,7 +94,7 @@ func (u *users) GetUserDetailsByName(ctx context.Context, name string) (*models.
 
 //GetUserDetails get user details by id
 func (u *users) GetUserDetailsById(ctx context.Context, userId string) (*models.User, error) {
-	collection := u.mongoClient.Database(config.GetConf().MongoDatabaseName).Collection("users")
+	collection := u.mongoClient.Database(u.conf.MongoDatabaseName).Collection("users")
 	ctx1, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 	var user models.User

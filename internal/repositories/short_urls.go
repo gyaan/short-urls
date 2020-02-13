@@ -17,6 +17,7 @@ import (
 type shortUrls struct {
 	mongoClient       *mongo.Client
 	counterRepository Counters
+	conf              *config.Config
 }
 
 //ShortUrls
@@ -32,10 +33,11 @@ type ShortUrls interface {
 }
 
 // NewShortUrlRepository creates new repositories for short urls
-func NewShortUrlRepository(client *mongo.Client, counterRepository Counters) ShortUrls {
+func NewShortUrlRepository(client *mongo.Client, counterRepository Counters, config2 *config.Config) ShortUrls {
 	return &shortUrls{
 		mongoClient:       client,
 		counterRepository: counterRepository,
+		conf:              config2,
 	}
 }
 
@@ -43,7 +45,7 @@ func NewShortUrlRepository(client *mongo.Client, counterRepository Counters) Sho
 func (s *shortUrls) CreateShortUrl(ctx context.Context, urlString string) (*models.ShortUrl, error) {
 
 	var srtUrl models.ShortUrl
-	collection := s.mongoClient.Database(config.GetConf().MongoDatabaseName).Collection("short_urls")
+	collection := s.mongoClient.Database(s.conf.MongoDatabaseName).Collection("short_urls")
 	urlIdentifier, err := s.counterRepository.UpdateAndGetCounter(ctx, "url_identifier")
 
 	log.Printf("New url identifier %d", urlIdentifier)
@@ -60,7 +62,7 @@ func (s *shortUrls) CreateShortUrl(ctx context.Context, urlString string) (*mode
 	srtUrl.UrlIdentifier = urlIdentifier
 	srtUrl.Status = 1 //default status active
 	srtUrl.CreatedAt = time.Now()
-	srtUrl.ExpireTime = time.Now().Add(time.Duration(config.GetConf().ShortUrlExpiryTime) * time.Hour)
+	srtUrl.ExpireTime = time.Now().Add(time.Duration(s.conf.ShortUrlExpiryTime) * time.Hour)
 	srtUrl.CreatedBy = fmt.Sprintf("%v", ctx.Value("user_id"))
 
 	res, err := collection.InsertOne(ctx, srtUrl)
@@ -77,7 +79,7 @@ func (s *shortUrls) GetAllShortUrls(ctx context.Context, offset int, limit int) 
 	log.Println("Get all short urls")
 
 	var res []models.ShortUrl
-	collection := s.mongoClient.Database(config.GetConf().MongoDatabaseName).Collection("short_urls")
+	collection := s.mongoClient.Database(s.conf.MongoDatabaseName).Collection("short_urls")
 	ctx1, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -109,7 +111,7 @@ func (s *shortUrls) GetAllShortUrls(ctx context.Context, offset int, limit int) 
 
 //UpdateShortUrls update existing short url
 func (s *shortUrls) UpdateShortUrls(ctx context.Context, shortUrlId string, shortUrl models.ShortUrl) error {
-	collection := s.mongoClient.Database(config.GetConf().MongoDatabaseName).Collection("short_urls")
+	collection := s.mongoClient.Database(s.conf.MongoDatabaseName).Collection("short_urls")
 	ctx1, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
@@ -133,7 +135,7 @@ func (s *shortUrls) UpdateShortUrls(ctx context.Context, shortUrlId string, shor
 
 //GetAShortUrl get single existing short url
 func (s *shortUrls) GetAShortUrl(ctx context.Context, srtUrlId string) (*models.ShortUrl, error) {
-	collection := s.mongoClient.Database(config.GetConf().MongoDatabaseName).Collection("short_urls")
+	collection := s.mongoClient.Database(s.conf.MongoDatabaseName).Collection("short_urls")
 	ctx1, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
@@ -158,7 +160,7 @@ func (s *shortUrls) GetAShortUrl(ctx context.Context, srtUrlId string) (*models.
 
 //DeleteShortUrl delete a short url
 func (s *shortUrls) DeleteShortUrl(ctx context.Context, srtUrlId string) error {
-	collection := s.mongoClient.Database(config.GetConf().MongoDatabaseName).Collection("short_urls")
+	collection := s.mongoClient.Database(s.conf.MongoDatabaseName).Collection("short_urls")
 	ctx1, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
@@ -184,7 +186,7 @@ func (s *shortUrls) DeleteShortUrl(ctx context.Context, srtUrlId string) error {
 func (s *shortUrls) GetActualUrlOfAShortUrl(ctx context.Context, shortUrl string) (*models.ShortUrl, error) {
 
 	var srtUrl models.ShortUrl
-	collection := s.mongoClient.Database(config.GetConf().MongoDatabaseName).Collection("short_urls")
+	collection := s.mongoClient.Database(s.conf.MongoDatabaseName).Collection("short_urls")
 	ctx1, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
@@ -203,7 +205,7 @@ func (s *shortUrls) GetActualUrlOfAShortUrl(ctx context.Context, shortUrl string
 
 //IncrementClickCountOfShortUrl increase clicks count for a url after clicking it
 func (s *shortUrls) IncrementClickCountOfShortUrl(ctx context.Context, shortUrl string) error {
-	collection := s.mongoClient.Database(config.GetConf().MongoDatabaseName).Collection("short_urls")
+	collection := s.mongoClient.Database(s.conf.MongoDatabaseName).Collection("short_urls")
 	ctx1, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
@@ -224,7 +226,7 @@ func (s *shortUrls) IncrementClickCountOfShortUrl(ctx context.Context, shortUrl 
 func (s *shortUrls) GetTotalShortUrlsCount(ctx context.Context) (int64, error) {
 
 	log.Println("Get short urls count for a user")
-	collection := s.mongoClient.Database(config.GetConf().MongoDatabaseName).Collection("short_urls")
+	collection := s.mongoClient.Database(s.conf.MongoDatabaseName).Collection("short_urls")
 	ctx1, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
