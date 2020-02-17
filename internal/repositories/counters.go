@@ -30,7 +30,7 @@ func NewCounterRepository(client *mongo.Client, config2 *config.Config) Counters
 //UpdateCounter increase sequence of a counter
 func (c counters) UpdateAndGetCounter(ctx context.Context, counterStr string) (int64, error) {
 	collection := c.mongoClient.Database(c.conf.MongoDatabaseName).Collection("counters")
-	ctx1, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx1, cancel := context.WithTimeout(ctx, time.Duration(c.conf.MongoContextTimeout)*time.Second)
 	defer cancel()
 	var counter models.Counter
 

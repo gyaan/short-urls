@@ -50,7 +50,7 @@ func (u *users) CreateUser(ctx context.Context, user models.User) (*models.User,
 func (u *users) UpdateUser(ctx context.Context, userId string, user *models.User) error {
 
 	collection := u.mongoClient.Database(u.conf.MongoDatabaseName).Collection("users")
-	ctx1, _ := context.WithTimeout(context.Background(), 30*time.Second)
+	ctx1, _ := context.WithTimeout(ctx, time.Duration(u.conf.MongoContextTimeout)*time.Second)
 
 	id, err := primitive.ObjectIDFromHex(userId)
 	if err != nil {
@@ -78,7 +78,7 @@ func (u *users) UpdateUser(ctx context.Context, userId string, user *models.User
 //GetUserDetails get user details for a name
 func (u *users) GetUserDetailsByName(ctx context.Context, name string) (*models.User, error) {
 	collection := u.mongoClient.Database(u.conf.MongoDatabaseName).Collection("users")
-	ctx1, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	ctx1, cancel := context.WithTimeout(ctx, time.Duration(u.conf.MongoContextTimeout)*time.Second)
 	defer cancel()
 	var user models.User
 
@@ -95,7 +95,7 @@ func (u *users) GetUserDetailsByName(ctx context.Context, name string) (*models.
 //GetUserDetails get user details by id
 func (u *users) GetUserDetailsById(ctx context.Context, userId string) (*models.User, error) {
 	collection := u.mongoClient.Database(u.conf.MongoDatabaseName).Collection("users")
-	ctx1, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	ctx1, cancel := context.WithTimeout(ctx, time.Duration(u.conf.MongoContextTimeout)*time.Second)
 	defer cancel()
 	var user models.User
 
