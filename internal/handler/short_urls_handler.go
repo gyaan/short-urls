@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/go-chi/chi"
 	"github.com/gyaan/short-urls/internal/models"
+	"github.com/gyaan/short-urls/internal/repositories"
 	"github.com/gyaan/short-urls/pkg/pagination"
 	"github.com/gyaan/short-urls/pkg/url"
 	"log"
@@ -23,8 +24,27 @@ type UpdateShortUrlRequest struct {
 	Status int `json:"status"`
 }
 
+type shortUrlHandler struct {
+	shortUrlRepository repositories.ShortUrls
+}
+
+type ShortUrlHandler interface {
+	CreateShortUrl(w http.ResponseWriter, r *http.Request)
+	GetAShortUrl(w http.ResponseWriter, r *http.Request)
+	GetAllShortUrl(w http.ResponseWriter, r *http.Request)
+	DeleteShortUrl(w http.ResponseWriter, r *http.Request)
+	UpdateShortUrl(w http.ResponseWriter, r *http.Request)
+	RedirectToActualUrl(w http.ResponseWriter, r *http.Request)
+	HomeHandler(w http.ResponseWriter, r *http.Request)
+}
+
+func NewShortUrlHandler(urls repositories.ShortUrls) ShortUrlHandler {
+	return  &shortUrlHandler{
+		shortUrlRepository:urls,
+	}
+}
 //CreateShortUrl creates new short url
-func (h *handler) CreateShortUrl(w http.ResponseWriter, r *http.Request) {
+func (h *shortUrlHandler) CreateShortUrl(w http.ResponseWriter, r *http.Request) {
 	var srtUrlReq CreateShortUrlRequest
 
 	//get values
@@ -62,7 +82,7 @@ func (h *handler) CreateShortUrl(w http.ResponseWriter, r *http.Request) {
 }
 
 //GetAShortUrl returns a single url details using url id
-func (h *handler) GetAShortUrl(w http.ResponseWriter, r *http.Request) {
+func (h *shortUrlHandler) GetAShortUrl(w http.ResponseWriter, r *http.Request) {
 	shortUrlId := chi.URLParam(r, "short_url_id")
 	log.Printf("Get short url details for %s", shortUrlId)
 	errResponse := models.ErrorResponse{ErrorMessage: "error fetching short url details", Retry: false}
@@ -85,7 +105,7 @@ func (h *handler) GetAShortUrl(w http.ResponseWriter, r *http.Request) {
 }
 
 //GetAllShortUrl returns all urls
-func (h *handler) GetAllShortUrl(w http.ResponseWriter, r *http.Request) {
+func (h *shortUrlHandler) GetAllShortUrl(w http.ResponseWriter, r *http.Request) {
 	errResponse := models.ErrorResponse{ErrorMessage: "error fetching all short url details", Retry: false}
 	var srtUrls []models.ShortUrl
 	page := 1
@@ -146,7 +166,7 @@ func (h *handler) GetAllShortUrl(w http.ResponseWriter, r *http.Request) {
 }
 
 //DeleteShortUrl deletes a url using url id
-func (h *handler) DeleteShortUrl(w http.ResponseWriter, r *http.Request) {
+func (h *shortUrlHandler) DeleteShortUrl(w http.ResponseWriter, r *http.Request) {
 
 	shortUrlId := chi.URLParam(r, "short_url_id")
 	err := h.shortUrlRepository.DeleteShortUrl(r.Context(), shortUrlId)
@@ -161,7 +181,7 @@ func (h *handler) DeleteShortUrl(w http.ResponseWriter, r *http.Request) {
 }
 
 //UpdateShortUrl updates existing url using url id
-func (h *handler) UpdateShortUrl(w http.ResponseWriter, r *http.Request) {
+func (h *shortUrlHandler) UpdateShortUrl(w http.ResponseWriter, r *http.Request) {
 	var srtUrlUpdateRequest UpdateShortUrlRequest
 
 	errResponse := models.ErrorResponse{ErrorMessage: "error updating short url", Retry: false}
@@ -187,7 +207,7 @@ func (h *handler) UpdateShortUrl(w http.ResponseWriter, r *http.Request) {
 }
 
 //RedirectToActualUrl redirect short urls to actual url
-func (h *handler) RedirectToActualUrl(w http.ResponseWriter, r *http.Request) {
+func (h *shortUrlHandler) RedirectToActualUrl(w http.ResponseWriter, r *http.Request) {
 	srtUrl := chi.URLParam(r, "short_url")
 	log.Printf("Redirecting to actual url for short url %s", srtUrl)
 
@@ -209,4 +229,10 @@ func (h *handler) RedirectToActualUrl(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.Redirect(w, r, redirectUrl, http.StatusSeeOther)
+}
+
+//HomeHandler handles / urls (base url)
+func (h *shortUrlHandler) HomeHandler(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprintf(w, "Welcome to short-urls open source")
 }

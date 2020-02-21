@@ -7,39 +7,41 @@ import (
 )
 
 type router struct {
-	h handler.Handler
+	sh handler.ShortUrlHandler
+	uh handler.UserHandler
+	ah handler.AuthenticationHandler
 	r *chi.Mux
 }
 
-func RegisterRoutes(h handler.Handler, r *chi.Mux) {
-	routes := router{h: h, r: r}
+func RegisterRoutes(sh handler.ShortUrlHandler, uh handler.UserHandler, ah handler.AuthenticationHandler, r *chi.Mux) {
+	routes := router{sh: sh, uh:uh, ah:ah, r: r}
 
 	//home router
-	routes.r.Get("/", routes.h.HomeHandler)
+	routes.r.Get("/", routes.sh.HomeHandler)
 
 	//user
-	routes.r.Post("/register", routes.h.RegisterUser)
+	routes.r.Post("/register", routes.uh.RegisterUser)
 
 	//protect user routes
 	userRouter := chi.NewRouter()
 	userRouter.Use(middleware.Authenticate)
-	userRouter.Put("/{user_id}", routes.h.UpdateUser)
-	userRouter.Get("/", routes.h.GetUser)
+	userRouter.Put("/{user_id}", routes.uh.UpdateUser)
+	userRouter.Get("/", routes.uh.GetUser)
 
 	//authentication
-	routes.r.Post("/access-token", routes.h.GetAccessToken)
+	routes.r.Post("/access-token", routes.ah.GetAccessToken)
 
 	//short url manipulation
 	shortUrlRouter := chi.NewRouter()
 	shortUrlRouter.Use(middleware.Authenticate)
-	shortUrlRouter.Post("/", routes.h.CreateShortUrl)
-	shortUrlRouter.Get("/{short_url_id}", routes.h.GetAShortUrl)
-	shortUrlRouter.Get("/", routes.h.GetAllShortUrl)
-	shortUrlRouter.Put("/{short_url_id}", routes.h.UpdateShortUrl)
-	shortUrlRouter.Delete("/{short_url_id}", routes.h.DeleteShortUrl)
+	shortUrlRouter.Post("/", routes.sh.CreateShortUrl)
+	shortUrlRouter.Get("/{short_url_id}", routes.sh.GetAShortUrl)
+	shortUrlRouter.Get("/", routes.sh.GetAllShortUrl)
+	shortUrlRouter.Put("/{short_url_id}", routes.sh.UpdateShortUrl)
+	shortUrlRouter.Delete("/{short_url_id}", routes.sh.DeleteShortUrl)
 
 	//short url redirection handler
-	routes.r.Get("/{short_url}", routes.h.RedirectToActualUrl)
+	routes.r.Get("/{short_url}", routes.sh.RedirectToActualUrl)
 
 	//add short url auth protect routs
 	routes.r.Mount("/short-urls", shortUrlRouter)

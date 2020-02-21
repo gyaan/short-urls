@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gyaan/short-urls/internal/models"
+	"github.com/gyaan/short-urls/internal/repositories"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"golang.org/x/crypto/bcrypt"
 	"log"
@@ -26,8 +27,24 @@ type UpdateUserRequest struct {
 	Status   int    `json:"status"`
 }
 
+type UserHandler interface {
+	RegisterUser(w http.ResponseWriter, r *http.Request)
+	UpdateUser(w http.ResponseWriter, r *http.Request)
+	GetUser(w http.ResponseWriter, r *http.Request)
+}
+
+type userHandler struct {
+	userRepository repositories.Users
+}
+
+func NewUserHandler(users repositories.Users) UserHandler {
+	return &userHandler{
+		userRepository: users,
+	}
+}
+
 //RegisterUser creates a new user
-func (h *handler) RegisterUser(w http.ResponseWriter, r *http.Request) {
+func (h *userHandler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 	var createUserRequest CreateUserRequest
 	errResponse := models.ErrorResponse{ErrorMessage: "error in registering user", Retry: false}
 
@@ -85,7 +102,7 @@ func (h *handler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 }
 
 //UpdateUser updates existing user
-func (h *handler) UpdateUser(w http.ResponseWriter, r *http.Request) {
+func (h *userHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	var updateUserRequest UpdateUserRequest
 	errResponse := models.ErrorResponse{ErrorMessage: "error in updating user details", Retry: false}
 
@@ -149,7 +166,8 @@ func (h *handler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "successfully update user details")
 }
 
-func (h *handler) GetUser(w http.ResponseWriter, r *http.Request) {
+//GetUser returns user details
+func (h *userHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 
 	userId := fmt.Sprintf("%v", r.Context().Value("user_id"))
 	errResponse := models.ErrorResponse{ErrorMessage: "error in fetching user details", Retry: false}

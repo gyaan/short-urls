@@ -30,13 +30,15 @@ func main() {
 	userRepository := repositories.NewUserRepository(mClient, conf)
 
 	//get handler
-	h := handler.NewHandler(shortUrlRepository, userRepository)
+	authenticationHandler := handler.NewAuthenticationHandler(userRepository, conf)
+	shortUrlHandler := handler.NewShortUrlHandler(shortUrlRepository)
+	userHandler := handler.NewUserHandler(userRepository)
 
 	//create routes
 	r := chi.NewRouter()
 
 	//register routes to handle request
-	router.RegisterRoutes(h, r)
+	router.RegisterRoutes(shortUrlHandler,userHandler,authenticationHandler, r)
 
 	//start server
 	err = http.ListenAndServe(conf.ApplicationPort, r)

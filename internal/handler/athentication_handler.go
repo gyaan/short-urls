@@ -6,6 +6,7 @@ import (
 	"github.com/gyaan/short-urls/internal/access_token"
 	"github.com/gyaan/short-urls/internal/config"
 	"github.com/gyaan/short-urls/internal/models"
+	"github.com/gyaan/short-urls/internal/repositories"
 	"golang.org/x/crypto/bcrypt"
 	"log"
 	"net/http"
@@ -23,8 +24,24 @@ type AccessTokenResponse struct {
 	AccessToken string `json:"access_token"`
 }
 
+type authenticationHandler struct {
+	userRepository repositories.Users
+	conf           *config.Config
+}
+
+type AuthenticationHandler interface {
+	GetAccessToken(w http.ResponseWriter, r *http.Request)
+}
+
+func NewAuthenticationHandler(users repositories.Users, config2 *config.Config) AuthenticationHandler {
+	return &authenticationHandler{
+		userRepository: users,
+		conf:           config2,
+	}
+}
+
 //GetAccessToken returns the access token after user verification
-func (h *handler) GetAccessToken(w http.ResponseWriter, r *http.Request) {
+func (h *authenticationHandler) GetAccessToken(w http.ResponseWriter, r *http.Request) {
 	var accessTokenRequest AccessTokenRequest
 	err := json.NewDecoder(r.Body).Decode(&accessTokenRequest)
 	errResponse := models.ErrorResponse{ErrorMessage: "error in generating access token", Retry: false}
@@ -60,7 +77,7 @@ func (h *handler) GetAccessToken(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tokenString, err := access_token.GetToken(user.ID.Hex(), config.GetConf().TokenExpiryTime, config.GetConf().JWTSecret)
+	tokenString, err := access_token.GetToken(user.ID.Hex(), h.conf.TokenExpiryTime, h.conf.JWTSecret)
 	if err != nil {
 		log.Printf("error in access access-token generation %v", err)
 		http.Error(w, errResponse.Error(), http.StatusBadRequest)
