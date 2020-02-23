@@ -7,5 +7,5 @@ mongo_database_password: "admin"
 short_url_expiry_time: 72 # in hours ie 3 days
 base_url: "http://localhsot:1334/"
 minimum_short_url_identifier: 1
-jwt_secret: "+,g~9Ywa8)7D<nbR"
+jwt_secret: "+,g~9Ywa8)7D<nbR122121"
 token_expiry_time: 432000 # in second ie. 5 days
