@@ -29,7 +29,7 @@ func main() {
 	shortUrlRepository := repositories.NewShortUrlRepository(mClient, counterRepository, conf)
 	userRepository := repositories.NewUserRepository(mClient, conf)
 
-	//get handler
+	//get handlers
 	authenticationHandler := handler.NewAuthenticationHandler(userRepository, conf)
 	shortUrlHandler := handler.NewShortUrlHandler(shortUrlRepository)
 	userHandler := handler.NewUserHandler(userRepository)
