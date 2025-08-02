@@ -12,7 +12,7 @@ var client *mongo.Client
 
 type MongoClient struct{}
 
-//NewMongoClient
+// NewMongoClient
 func New(mongoDbConnectionUrl string, mongoContextTimeout int) (*mongo.Client, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(mongoContextTimeout)*time.Second)
 	defer cancel()
@@ -27,7 +27,7 @@ func New(mongoDbConnectionUrl string, mongoContextTimeout int) (*mongo.Client, e
 	return client, nil
 }
 
-//GetClient returns mongo client
+// GetClient returns mongo client
 func GetClient() *mongo.Client {
 	return client
 }

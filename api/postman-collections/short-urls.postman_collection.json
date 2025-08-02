@@ -1,334 +1,294 @@
 {
-	"info": {
-		"_postman_id": "912f8011-2b46-467f-979d-dd6764e3f04a",
-		"name": "short-urls",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-	},
-	"item": [
-		{
-			"name": "Get all short-urls",
-			"request": {
-				"method": "GET",
-				"header": [
-					{
-						"key": "Authorization",
-						"value": "{{ACCESS_TOKEN}}",
-						"type": "text"
-					},
-					{
-						"key": "Content-Type",
-						"value": "application/json",
-						"type": "text"
-					},
-					{
-						"key": "Accept",
-						"value": "applicatin/json",
-						"type": "text"
-					}
-				],
-				"url": {
-					"raw": "{{BASE_URL}}/short-urls",
-					"host": [
-						"{{BASE_URL}}"
-					],
-					"path": [
-						"short-urls"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Create short url",
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Authorization",
-						"value": "{{ACCESS_TOKEN}}",
-						"type": "text"
-					},
-					{
-						"key": "Content-Type",
-						"value": "application/json",
-						"type": "text"
-					},
-					{
-						"key": "Accept",
-						"value": "applicatin/json",
-						"type": "text"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n\t\"url\" : \"http://www.google3.com\"\n}"
-				},
-				"url": {
-					"raw": "{{BASE_URL}}/short-urls",
-					"host": [
-						"{{BASE_URL}}"
-					],
-					"path": [
-						"short-urls"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Get individual short url",
-			"request": {
-				"method": "GET",
-				"header": [
-					{
-						"key": "Authorization",
-						"value": "{{ACCESS_TOKEN}}",
-						"type": "text"
-					},
-					{
-						"key": "Content-Type",
-						"value": "application/json",
-						"type": "text"
-					},
-					{
-						"key": "Accept",
-						"value": "applicatin/json",
-						"type": "text"
-					}
-				],
-				"url": {
-					"raw": "{{BASE_URL}}/short-urls/5e22dbb7f87828a2bcac74c1",
-					"host": [
-						"{{BASE_URL}}"
-					],
-					"path": [
-						"short-urls",
-						"5e22dbb7f87828a2bcac74c1"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Update short url",
-			"request": {
-				"method": "PUT",
-				"header": [
-					{
-						"key": "Authorization",
-						"value": "{{ACCESS_TOKEN}}",
-						"type": "text"
-					},
-					{
-						"key": "Content-Type",
-						"value": "application/json",
-						"type": "text"
-					},
-					{
-						"key": "Accept",
-						"value": "applicatin/json",
-						"type": "text"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n\t\"original_url\":\"hello-world.com\",\n\t\"total_views\":12,\n\t\"short_url\" : \"test short url\",\n\t\"id\": \"5b1c08564f813e2b40725195\"\n}"
-				},
-				"url": {
-					"raw": "{{BASE_URL}}/short-urls/5b1c08564f813e2b40725195",
-					"host": [
-						"{{BASE_URL}}"
-					],
-					"path": [
-						"short-urls",
-						"5b1c08564f813e2b40725195"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Delete short url",
-			"request": {
-				"method": "DELETE",
-				"header": [
-					{
-						"key": "Authorization",
-						"value": "{{ACCESS_TOKEN}}",
-						"type": "text"
-					},
-					{
-						"key": "Content-Type",
-						"value": "application/json",
-						"type": "text"
-					},
-					{
-						"key": "Accept",
-						"value": "applicatin/json",
-						"type": "text"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n\t\"original_url\":\"hello-world.com\",\n\t\"total_views\":12,\n\t\"short_url\" : \"test short url\",\n\t\"id\": \"5b1c08564f813e2b40725195\"\n}"
-				},
-				"url": {
-					"raw": "{{BASE_URL}}/short-urls/5e22ee9f3899dc8b70b795aa",
-					"host": [
-						"{{BASE_URL}}"
-					],
-					"path": [
-						"short-urls",
-						"5e22ee9f3899dc8b70b795aa"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Get User",
-			"request": {
-				"method": "GET",
-				"header": [
-					{
-						"key": "Authorization",
-						"value": "{{ACCESS_TOKEN}}",
-						"type": "text"
-					},
-					{
-						"key": "Content-Type",
-						"value": "application/json",
-						"type": "text"
-					},
-					{
-						"key": "Accept",
-						"value": "applicatin/json",
-						"type": "text"
-					}
-				],
-				"url": {
-					"raw": "{{BASE_URL}}/users/",
-					"host": [
-						"{{BASE_URL}}"
-					],
-					"path": [
-						"users",
-						""
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Update User",
-			"request": {
-				"method": "PUT",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"id\": \"5b5cbcd94f813e0c8f34a4b6\",\n    \"name\": \"Gyaneshwar Pardhi updated\",\n    \"email\": \"gyaan1334@gmail.com\",\n    \"Password\": \"121212\"\n}"
-				},
-				"url": {
-					"raw": "http://localhost:1334/users",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "1334",
-					"path": [
-						"users"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Register User",
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json",
-						"type": "text"
-					},
-					{
-						"key": "Accept",
-						"value": "applicatin/json",
-						"type": "text"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"email\": \"gyaan1334@gmail.com\",\n    \"name\":\"gyaan33\",\n    \"password\": \"121212\",\n    \"confirm_password\":\"121212\",\n    \"status\":1\n}"
-				},
-				"url": {
-					"raw": "{{BASE_URL}}/register",
-					"host": [
-						"{{BASE_URL}}"
-					],
-					"path": [
-						"register"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Get AccessToken",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"id": "56cd5fc1-5cb0-4afc-ae3c-cab08a923c69",
-						"exec": [
-							"var jsonData = JSON.parse(responseBody);",
-							"postman.setEnvironmentVariable(\"ACCESS_TOKEN\", \"Bearer \" + jsonData.access_token);",
-							""
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json",
-						"type": "text"
-					},
-					{
-						"key": "Accept",
-						"value": "applicatin/json",
-						"type": "text"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n\t\"name\":\"gyaan1\",\n    \"password\": \"121212\"\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "{{BASE_URL}}/access-token",
-					"host": [
-						"{{BASE_URL}}"
-					],
-					"path": [
-						"access-token"
-					]
-				}
-			},
-			"response": []
-		}
-	]
+  "info": {
+    "_postman_id": "912f8011-2b46-467f-979d-dd6764e3f04a",
+    "name": "short-urls",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Get all short-urls",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "{{ACCESS_TOKEN}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Accept",
+            "value": "applicatin/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{BASE_URL}}/short-urls",
+          "host": ["{{BASE_URL}}"],
+          "path": ["short-urls"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create short url",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "{{ACCESS_TOKEN}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Accept",
+            "value": "applicatin/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n\t\"url\" : \"http://www.google3.com\"\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}/short-urls",
+          "host": ["{{BASE_URL}}"],
+          "path": ["short-urls"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get individual short url",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "{{ACCESS_TOKEN}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Accept",
+            "value": "applicatin/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{BASE_URL}}/short-urls/5e22dbb7f87828a2bcac74c1",
+          "host": ["{{BASE_URL}}"],
+          "path": ["short-urls", "5e22dbb7f87828a2bcac74c1"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Update short url",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "{{ACCESS_TOKEN}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Accept",
+            "value": "applicatin/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n\t\"original_url\":\"hello-world.com\",\n\t\"total_views\":12,\n\t\"short_url\" : \"test short url\",\n\t\"id\": \"5b1c08564f813e2b40725195\"\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}/short-urls/5b1c08564f813e2b40725195",
+          "host": ["{{BASE_URL}}"],
+          "path": ["short-urls", "5b1c08564f813e2b40725195"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Delete short url",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "{{ACCESS_TOKEN}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Accept",
+            "value": "applicatin/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n\t\"original_url\":\"hello-world.com\",\n\t\"total_views\":12,\n\t\"short_url\" : \"test short url\",\n\t\"id\": \"5b1c08564f813e2b40725195\"\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}/short-urls/5e22ee9f3899dc8b70b795aa",
+          "host": ["{{BASE_URL}}"],
+          "path": ["short-urls", "5e22ee9f3899dc8b70b795aa"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get User",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "{{ACCESS_TOKEN}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Accept",
+            "value": "applicatin/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{BASE_URL}}/users/",
+          "host": ["{{BASE_URL}}"],
+          "path": ["users", ""]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Update User",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"id\": \"5b5cbcd94f813e0c8f34a4b6\",\n    \"name\": \"Gyaneshwar Pardhi updated\",\n    \"email\": \"gyaan1334@gmail.com\",\n    \"Password\": \"121212\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:1334/users",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "1334",
+          "path": ["users"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Register User",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Accept",
+            "value": "applicatin/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"email\": \"gyaan1334@gmail.com\",\n    \"name\":\"gyaan33\",\n    \"password\": \"121212\",\n    \"confirm_password\":\"121212\",\n    \"status\":1\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}/register",
+          "host": ["{{BASE_URL}}"],
+          "path": ["register"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get AccessToken",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "id": "56cd5fc1-5cb0-4afc-ae3c-cab08a923c69",
+            "exec": [
+              "var jsonData = JSON.parse(responseBody);",
+              "postman.setEnvironmentVariable(\"ACCESS_TOKEN\", \"Bearer \" + jsonData.access_token);",
+              ""
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Accept",
+            "value": "applicatin/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n\t\"name\":\"gyaan1\",\n    \"password\": \"121212\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{BASE_URL}}/access-token",
+          "host": ["{{BASE_URL}}"],
+          "path": ["access-token"]
+        }
+      },
+      "response": []
+    }
+  ]
 }

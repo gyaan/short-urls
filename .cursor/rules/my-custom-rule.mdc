@@ -1,0 +1,165 @@
+---
+alwaysApply: true
+---
+
+# Golang Best Practices for Web Crawler Project
+
+## Code Organization and Structure
+
+### Package Structure
+- Use clear, descriptive package names
+- Keep packages focused on a single responsibility
+- Organize code into logical directories (cmd/, internal/, pkg/)
+
+### File Naming
+- Use snake_case for file names
+- Group related functionality in the same file
+- Separate interfaces from implementations when beneficial
+
+## Coding Standards
+
+### Naming Conventions
+- Use `camelCase` for variables and functions
+- Use `PascalCase` for exported functions, types, and constants
+- Use `UPPER_CASE` for package-level constants
+- Use descriptive names that clearly indicate purpose
+
+### Function Design
+- Keep functions small and focused (ideally < 50 lines)
+- Use meaningful parameter and return names
+- Return errors as the last return value
+- Use `defer` for cleanup operations
+- Prefer composition over inheritance
+
+### Error Handling
+- Always check and handle errors explicitly
+- Use `fmt.Errorf()` with `%w` verb for error wrapping
+- Return errors up the call stack when appropriate
+- Use custom error types for specific error cases
+- Log errors with context when needed
+
+### Concurrency Best Practices
+- Use `sync.Map` for concurrent access (as in visitedLinks)
+- Use buffered channels to prevent deadlocks
+- Always close channels from the sender side
+- Use `sync.WaitGroup` or channels for coordination
+- Avoid goroutine leaks by ensuring proper cleanup
+
+### Memory Management
+- Use `defer` for resource cleanup
+- Be mindful of goroutine memory usage
+- Consider using object pools for frequently allocated objects
+- Use pointers appropriately (avoid unnecessary copying)
+
+## Web Crawler Specific Guidelines
+
+### HTTP Handling
+- Always close response bodies with `defer`
+- Set appropriate timeouts for HTTP requests
+- Handle different HTTP status codes appropriately
+- Use context for request cancellation
+- Implement retry logic for transient failures
+
+### HTML Parsing
+- Validate HTML structure before parsing
+- Handle malformed HTML gracefully
+- Use appropriate selectors for element extraction
+- Consider using headless browsers for JavaScript-heavy sites
+
+### URL Processing
+- Validate URLs before processing
+- Handle relative vs absolute URLs correctly
+- Implement URL normalization
+- Respect robots.txt and rate limiting
+
+### Concurrency Control
+- Limit the number of concurrent requests
+- Implement rate limiting to be respectful to servers
+- Use worker pools for controlled concurrency
+- Monitor and log crawler performance
+
+## Testing Guidelines
+
+### Unit Testing
+- Write tests for all exported functions
+- Use table-driven tests for multiple scenarios
+- Mock external dependencies (HTTP, file system)
+- Test error conditions and edge cases
+
+### Integration Testing
+- Test the full crawler workflow
+- Use test servers for HTTP testing
+- Verify concurrent behavior
+- Test with realistic data
+
+## Performance Considerations
+
+### Optimization
+- Profile code to identify bottlenecks
+- Use connection pooling for HTTP requests
+- Implement caching where appropriate
+- Monitor memory usage and goroutine count
+
+### Resource Management
+- Set appropriate timeouts
+- Implement circuit breakers for external services
+- Use context for cancellation
+- Monitor and log resource usage
+
+## Documentation
+
+### Code Comments
+- Write clear, concise comments for exported functions
+- Use godoc format for package documentation
+- Comment complex algorithms and business logic
+- Keep comments up to date with code changes
+
+### README and Documentation
+- Maintain comprehensive README
+- Document configuration options
+- Provide usage examples
+- Document known limitations
+
+## Security Considerations
+
+### Input Validation
+- Validate all user inputs
+- Sanitize URLs before processing
+- Implement proper error handling
+- Avoid exposing sensitive information in logs
+
+### Network Security
+- Use HTTPS when possible
+- Implement proper TLS configuration
+- Validate SSL certificates
+- Be cautious with user-provided URLs
+
+## Code Quality
+
+### Linting and Formatting
+- Use `gofmt` for code formatting
+- Run `golint` and `golangci-lint`
+- Follow Go style guide consistently
+- Use `go vet` to catch common mistakes
+
+### Version Control
+- Write meaningful commit messages
+- Keep commits focused and atomic
+- Use feature branches for development
+- Review code before merging
+
+## Dependencies
+
+### Module Management
+- Use Go modules for dependency management
+- Pin dependency versions appropriately
+- Regularly update dependencies
+- Audit dependencies for security issues
+- Minimize external dependencies
+
+### Vendor Management
+- Vendor dependencies for reproducible builds
+- Document dependency update process
+- Use `go mod tidy` to clean up unused dependencies
+alwaysApply: false
+---

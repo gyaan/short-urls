@@ -12,13 +12,13 @@ import (
 	"net/http"
 )
 
-//AccessTokenRequest
+// AccessTokenRequest
 type AccessTokenRequest struct {
 	Name     string `json:"name"`
 	Password string `json:"password"`
 }
 
-//AccessTokenResponse
+// AccessTokenResponse
 type AccessTokenResponse struct {
 	Id          string `json:"id"`
 	AccessToken string `json:"access_token"`
@@ -40,7 +40,7 @@ func NewAuthenticationHandler(users repositories.Users, config2 *config.Config) 
 	}
 }
 
-//GetAccessToken returns the access token after user verification
+// GetAccessToken returns the access token after user verification
 func (h *authenticationHandler) GetAccessToken(w http.ResponseWriter, r *http.Request) {
 	var accessTokenRequest AccessTokenRequest
 	err := json.NewDecoder(r.Body).Decode(&accessTokenRequest)

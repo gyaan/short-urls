@@ -10,11 +10,11 @@ type router struct {
 	sh handler.ShortUrlHandler
 	uh handler.UserHandler
 	ah handler.AuthenticationHandler
-	r *chi.Mux
+	r  *chi.Mux
 }
 
 func RegisterRoutes(sh handler.ShortUrlHandler, uh handler.UserHandler, ah handler.AuthenticationHandler, r *chi.Mux) {
-	routes := router{sh: sh, uh:uh, ah:ah, r: r}
+	routes := router{sh: sh, uh: uh, ah: ah, r: r}
 
 	//home router
 	routes.r.Get("/", routes.sh.HomeHandler)

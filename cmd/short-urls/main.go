@@ -1,51 +1,45 @@
 package main
 
 import (
-	"fmt"
+	"log"
+	"net/http"
+
 	"github.com/go-chi/chi"
 	"github.com/gyaan/short-urls/internal/config"
 	"github.com/gyaan/short-urls/internal/handler"
 	mclient "github.com/gyaan/short-urls/internal/mongo_client"
 	"github.com/gyaan/short-urls/internal/repositories"
 	"github.com/gyaan/short-urls/internal/router"
-	"log"
-	"net/http"
 )
 
+// main initializes and starts the short URL service
 func main() {
-
-	//create config
+	// Initialize configuration
 	conf := config.New()
 
-	//mongodb client
+	// Initialize MongoDB client
 	mClient, err := mclient.New(conf.MongoDbConnectionUrl, conf.MongoContextTimeout)
-
 	if err != nil {
-		log.Fatalf("Error connecting mongodb")
+		log.Fatalf("Failed to connect to MongoDB: %v", err)
 	}
 
-	//get repositories
+	// Initialize repositories
 	counterRepository := repositories.NewCounterRepository(mClient, conf)
 	shortUrlRepository := repositories.NewShortUrlRepository(mClient, counterRepository, conf)
 	userRepository := repositories.NewUserRepository(mClient, conf)
 
-	//get handlers
+	// Initialize handlers
 	authenticationHandler := handler.NewAuthenticationHandler(userRepository, conf)
 	shortUrlHandler := handler.NewShortUrlHandler(shortUrlRepository)
 	userHandler := handler.NewUserHandler(userRepository)
 
-	//create routes
+	// Create router and register routes
 	r := chi.NewRouter()
+	router.RegisterRoutes(shortUrlHandler, userHandler, authenticationHandler, r)
 
-	//register routes to handle request
-	router.RegisterRoutes(shortUrlHandler,userHandler,authenticationHandler, r)
-
-	//start server
-	err = http.ListenAndServe(conf.ApplicationPort, r)
-
-	if err != nil {
-		fmt.Println("Error:", err.Error())
+	// Start HTTP server
+	log.Printf("Starting short URL application on port: %s", conf.ApplicationPort)
+	if err := http.ListenAndServe(conf.ApplicationPort, r); err != nil {
+		log.Fatalf("Failed to start server: %v", err)
 	}
-
-	fmt.Println("short url application started and served at port:", conf.ApplicationPort)
 }

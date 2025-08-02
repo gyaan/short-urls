@@ -2,45 +2,42 @@ package middleware
 
 import (
 	"context"
-	"github.com/gyaan/short-urls/internal/access_token"
-	"github.com/gyaan/short-urls/internal/config"
-	"github.com/gyaan/short-urls/internal/models"
 	"log"
 	"net/http"
 	"strings"
+
+	"github.com/gyaan/short-urls/internal/access_token"
+	"github.com/gyaan/short-urls/internal/config"
 )
 
-// Authenticate validate access token passed in request
+// Authenticate validates the access token passed in the request
 func Authenticate(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		errResponse := models.ErrorResponse{ErrorMessage: "Error with access token.", Retry: false}
-		reqToken := r.Header.Get("Authorization")
+		authToken := r.Header.Get("Authorization")
 
-		//check if authorization code is there or not
-		if len(reqToken) == 0 {
-			errResponse.ErrorMessage = "unauthorized access"
-			http.Error(w, errResponse.Error(), http.StatusBadRequest)
+		// Check if authorization header is present
+		if authToken == "" {
+			http.Error(w, "Unauthorized access", http.StatusUnauthorized)
 			return
 		}
 
-		splitToken := strings.Split(reqToken, "Bearer")
-		if len(splitToken) != 2 {
-			errResponse.ErrorMessage = "invalid bearer authorization access token."
-			http.Error(w, errResponse.Error(), http.StatusBadRequest)
+		// Validate Bearer token format
+		parts := strings.Split(authToken, "Bearer")
+		if len(parts) != 2 {
+			http.Error(w, "Invalid bearer token format", http.StatusBadRequest)
 			return
 		}
-		reqToken = strings.TrimSpace(splitToken[1])
-		claims, err := access_token.ValidateToken(reqToken,config.GetConf().JWTSecret)
 
+		token := strings.TrimSpace(parts[1])
+		claims, err := access_token.ValidateToken(token, config.GetConf().JWTSecret)
 		if err != nil {
-			log.Println("error in access token validation")
-			errResponse.ErrorMessage = "error in access token validation"
-			http.Error(w, errResponse.Error(), http.StatusInternalServerError)
+			log.Printf("Failed to validate access token: %v", err)
+			http.Error(w, "Invalid access token", http.StatusUnauthorized)
 			return
 		}
 
-		//add user_id to context for later use in handler
-		newContext := context.WithValue(r.Context(), "user_id", claims["id"])
-		next.ServeHTTP(w, r.WithContext(newContext))
+		// Add user ID to context for use in handlers
+		ctx := context.WithValue(r.Context(), "user_id", claims["id"])
+		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
