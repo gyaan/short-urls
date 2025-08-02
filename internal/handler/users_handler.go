@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-//CreateUserRequest
+// CreateUserRequest
 type CreateUserRequest struct {
 	Name            string `json:"name"`
 	Email           string `json:"email"`
@@ -20,7 +20,7 @@ type CreateUserRequest struct {
 	ConfirmPassword string `json:"confirm_password"`
 }
 
-//UpdateUserRequest
+// UpdateUserRequest
 type UpdateUserRequest struct {
 	Password string `json:"password"`
 	Email    string `json:"email"`
@@ -43,7 +43,7 @@ func NewUserHandler(users repositories.Users) UserHandler {
 	}
 }
 
-//RegisterUser creates a new user
+// RegisterUser creates a new user
 func (h *userHandler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 	var createUserRequest CreateUserRequest
 	errResponse := models.ErrorResponse{ErrorMessage: "error in registering user", Retry: false}
@@ -101,7 +101,7 @@ func (h *userHandler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, string(bytes))
 }
 
-//UpdateUser updates existing user
+// UpdateUser updates existing user
 func (h *userHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	var updateUserRequest UpdateUserRequest
 	errResponse := models.ErrorResponse{ErrorMessage: "error in updating user details", Retry: false}
@@ -166,7 +166,7 @@ func (h *userHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "successfully update user details")
 }
 
-//GetUser returns user details
+// GetUser returns user details
 func (h *userHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 
 	userId := fmt.Sprintf("%v", r.Context().Value("user_id"))

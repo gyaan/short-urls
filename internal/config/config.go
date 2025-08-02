@@ -1,11 +1,11 @@
 package config
 
 import (
-	"fmt"
-	"github.com/spf13/viper"
 	"log"
 	"path/filepath"
 	"runtime"
+
+	"github.com/spf13/viper"
 )
 
 var (
@@ -14,7 +14,7 @@ var (
 	basePath   = filepath.Join(filepath.Dir(b), "../../")
 )
 
-//Config
+// Config holds application configuration settings
 type Config struct {
 	ApplicationPort           string `json:"application_port" mapstructure:"application_port"`
 	MongoDbConnectionUrl      string `json:"mongo_db_connection_url" mapstructure:"mongo_db_connection_url"`
@@ -29,50 +29,45 @@ type Config struct {
 	TokenExpiryTime           int64  `json:"token_expiry_time" mapstructure:"token_expiry_time"`
 }
 
-// NewConfig returns creates new application config
+// New creates and returns a new application configuration
 func New() *Config {
-
 	v := viper.New()
 
-	//set mongo env variable default config values will overwrite with env variable
-	err := v.BindEnv("mongo_database_name", "MONGO_INITDB_DATABASE")
-	if err != nil {
-		log.Printf("not able to set env variable for mongo_database_name %v", err)
+	// Bind environment variables for MongoDB configuration
+	if err := v.BindEnv("mongo_database_name", "MONGO_INITDB_DATABASE"); err != nil {
+		log.Printf("Failed to bind env variable for mongo_database_name: %v", err)
 	}
 
-	err = v.BindEnv("mongo_database_username", "MONGO_INITDB_ROOT_USERNAME")
-	if err != nil {
-		log.Printf("not able to set env variable for mongo_database_username %v", err)
+	if err := v.BindEnv("mongo_database_username", "MONGO_INITDB_ROOT_USERNAME"); err != nil {
+		log.Printf("Failed to bind env variable for mongo_database_username: %v", err)
 	}
 
-	err = v.BindEnv("mongo_database_password", "MONGO_INITDB_ROOT_PASSWORD")
-	if err != nil {
-		log.Printf("not able to set env variable for mongo_database_password %v", err)
+	if err := v.BindEnv("mongo_database_password", "MONGO_INITDB_ROOT_PASSWORD"); err != nil {
+		log.Printf("Failed to bind env variable for mongo_database_password: %v", err)
 	}
 
-	err = v.BindEnv("mongo_db_connection_url", "MONGO_HOST")
-	if err != nil {
-		log.Printf("not able to set env variable for mongo_db_connection_url %v", err)
+	if err := v.BindEnv("mongo_db_connection_url", "MONGO_HOST"); err != nil {
+		log.Printf("Failed to bind env variable for mongo_db_connection_url: %v", err)
 	}
 
+	// Configure viper to read YAML config file
 	v.SetConfigType("yaml")
 	v.AddConfigPath(basePath + "/config")
 	v.SetConfigName("config")
-	err = v.ReadInConfig()
-	if err != nil {
-		fmt.Printf("%v", err)
+
+	if err := v.ReadInConfig(); err != nil {
+		log.Printf("Failed to read config file: %v", err)
 	}
 
-	err = v.Unmarshal(&conf)
-	if err != nil {
-		log.Fatalf("%v", err)
+	if err := v.Unmarshal(&conf); err != nil {
+		log.Fatalf("Failed to unmarshal config: %v", err)
 	}
 
-	log.Printf("%v", conf)
+	log.Printf("Configuration loaded: %+v", conf)
 	return conf
 }
 
-// GetConf returns config
+// GetConf returns the current configuration instance
 func GetConf() *Config {
 	return conf
 }

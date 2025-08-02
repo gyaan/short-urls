@@ -61,9 +61,9 @@ func Test_userHandler_UpdateUser(t *testing.T) {
 
 	//request data
 	requestData, err := json.Marshal(UpdateUserRequest{
-		Email:           "test@gmail.com",
-		Password:        "test1223",
-		Status: 0,
+		Email:    "test@gmail.com",
+		Password: "test1223",
+		Status:   0,
 	})
 
 	if err != nil {
@@ -84,14 +84,13 @@ func Test_userHandler_UpdateUser(t *testing.T) {
 		Status:   1,
 	}
 
-
 	//creat new response writer
 	rr := httptest.NewRecorder()
 
 	//user repository mock
 	userRepository := mocks.Users{}
-	userRepository.On("GetUserDetailsById", context.TODO(), mock.Anything).Return(&user,nil)
-	userRepository.On("UpdateUser", context.TODO(), mock.Anything,mock.Anything).Return( nil)
+	userRepository.On("GetUserDetailsById", context.TODO(), mock.Anything).Return(&user, nil)
+	userRepository.On("UpdateUser", context.TODO(), mock.Anything, mock.Anything).Return(nil)
 	newUserHandler := NewUserHandler(&userRepository)
 	handler := http.HandlerFunc(newUserHandler.UpdateUser)
 	handler.ServeHTTP(rr, req)
@@ -105,7 +104,7 @@ func Test_userHandler_UpdateUser(t *testing.T) {
 
 func Test_userHandler_GetUser(t *testing.T) {
 	//create request
-	req, err := http.NewRequest("GET", "/users", bytes.NewBufferString(url.Values{"user_id":{`xyx`}}.Encode()))
+	req, err := http.NewRequest("GET", "/users", bytes.NewBufferString(url.Values{"user_id": {`xyx`}}.Encode()))
 	if err != nil {
 		t.Fatal(err)
 	}

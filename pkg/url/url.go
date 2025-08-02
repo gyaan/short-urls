@@ -16,7 +16,7 @@ func New() Url {
 	return &url{}
 }
 
-//ValidateUrl validate a given string is url or not
+// ValidateUrl validate a given string is url or not
 func (u url) ValidateUrl(urlString string) bool {
 	validUrl := regexp.MustCompile(RegexForValidUrl)
 	return validUrl.MatchString(urlString)

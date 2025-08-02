@@ -13,17 +13,16 @@ import (
 	"testing"
 )
 
-
 func Test_shortUrlHandler_CreateShortUrl(t *testing.T) {
 	//request data
 	requestData, err := json.Marshal(CreateShortUrlRequest{
-		Url:"https://www.google.com",
+		Url: "https://www.google.com",
 	})
 
 	//user details
 	shortUrl := models.ShortUrl{
-		Url: "https://www.google.com/",
-		NewUrl:"https://newshorturl.com/",
+		Url:    "https://www.google.com/",
+		NewUrl: "https://newshorturl.com/",
 	}
 
 	if err != nil {
@@ -57,7 +56,7 @@ func Test_shortUrlHandler_CreateShortUrl(t *testing.T) {
 func Test_shortUrlHandler_GetAShortUrl(t *testing.T) {
 
 	//create request
-	req, err := http.NewRequest("GET", "/short-urls", bytes.NewBufferString(url.Values{"short_url_id":{`xyx`}}.Encode()))
+	req, err := http.NewRequest("GET", "/short-urls", bytes.NewBufferString(url.Values{"short_url_id": {`xyx`}}.Encode()))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -67,8 +66,8 @@ func Test_shortUrlHandler_GetAShortUrl(t *testing.T) {
 
 	//user details
 	shortUrl := models.ShortUrl{
-		Url: "https://www.google.com/",
-		NewUrl:"https://newshorturl.com/",
+		Url:    "https://www.google.com/",
+		NewUrl: "https://newshorturl.com/",
 	}
 
 	//user repository mock
@@ -89,7 +88,7 @@ func Test_shortUrlHandler_GetAShortUrl(t *testing.T) {
 func Test_shortUrlHandler_GetAllShortUrl(t *testing.T) {
 
 	//create request
-	req, err := http.NewRequest("GET", "/short-urls", bytes.NewBufferString(url.Values{"page":{`1`},"limit":{`10`}}.Encode()))
+	req, err := http.NewRequest("GET", "/short-urls", bytes.NewBufferString(url.Values{"page": {`1`}, "limit": {`10`}}.Encode()))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -105,7 +104,7 @@ func Test_shortUrlHandler_GetAllShortUrl(t *testing.T) {
 
 	//user repository mock
 	shortUrlRepository := mocks.ShortUrls{}
-	shortUrlRepository.On("GetTotalShortUrlsCount",context.TODO()).Return(int64(10),nil)
+	shortUrlRepository.On("GetTotalShortUrlsCount", context.TODO()).Return(int64(10), nil)
 	shortUrlRepository.On("GetAllShortUrls", context.TODO(), mock.Anything, mock.Anything).Return(shortUrl, nil)
 	newShortUrlHandler := NewShortUrlHandler(&shortUrlRepository)
 	handler := http.HandlerFunc(newShortUrlHandler.GetAllShortUrl)
@@ -120,7 +119,7 @@ func Test_shortUrlHandler_GetAllShortUrl(t *testing.T) {
 
 func Test_shortUrlHandler_DeleteShortUrl(t *testing.T) {
 	//create request
-	req, err := http.NewRequest("GET", "/short-urls", bytes.NewBufferString(url.Values{"short_url_id":{`xyx`}}.Encode()))
+	req, err := http.NewRequest("GET", "/short-urls", bytes.NewBufferString(url.Values{"short_url_id": {`xyx`}}.Encode()))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -146,7 +145,7 @@ func Test_shortUrlHandler_DeleteShortUrl(t *testing.T) {
 func Test_shortUrlHandler_UpdateShortUrl(t *testing.T) {
 	//request data
 	requestData, err := json.Marshal(UpdateShortUrlRequest{
-		Status:1,
+		Status: 1,
 	})
 
 	if err != nil {
@@ -154,7 +153,7 @@ func Test_shortUrlHandler_UpdateShortUrl(t *testing.T) {
 	}
 
 	//create request
-	req, err := http.NewRequest("POST", "/short-urls?short_url_id=xyx",bytes.NewBuffer(requestData))
+	req, err := http.NewRequest("POST", "/short-urls?short_url_id=xyx", bytes.NewBuffer(requestData))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -164,7 +163,7 @@ func Test_shortUrlHandler_UpdateShortUrl(t *testing.T) {
 
 	//user repository mock
 	shortUrlRepository := mocks.ShortUrls{}
-	shortUrlRepository.On("UpdateShortUrls", context.TODO(), mock.Anything,mock.Anything).Return( nil)
+	shortUrlRepository.On("UpdateShortUrls", context.TODO(), mock.Anything, mock.Anything).Return(nil)
 	newShortUrlHandler := NewShortUrlHandler(&shortUrlRepository)
 	handler := http.HandlerFunc(newShortUrlHandler.UpdateShortUrl)
 	handler.ServeHTTP(rr, req)
@@ -178,7 +177,7 @@ func Test_shortUrlHandler_UpdateShortUrl(t *testing.T) {
 
 func Test_shortUrlHandler_RedirectToActualUrl(t *testing.T) {
 	//create request
-	req, err := http.NewRequest("GET", "/short-urls", bytes.NewBufferString(url.Values{"short_url":{`xyx`}}.Encode()))
+	req, err := http.NewRequest("GET", "/short-urls", bytes.NewBufferString(url.Values{"short_url": {`xyx`}}.Encode()))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -188,8 +187,8 @@ func Test_shortUrlHandler_RedirectToActualUrl(t *testing.T) {
 
 	//user details
 	shortUrl := models.ShortUrl{
-		Url: "https://www.google.com/",
-		NewUrl:"https://newshorturl.com/",
+		Url:    "https://www.google.com/",
+		NewUrl: "https://newshorturl.com/",
 	}
 
 	//user repository mock

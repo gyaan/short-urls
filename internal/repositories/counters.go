@@ -17,17 +17,17 @@ type counters struct {
 	conf        *config.Config
 }
 
-//Counters
+// Counters
 type Counters interface {
 	UpdateAndGetCounter(ctx context.Context, counter string) (int64, error)
 }
 
-//NewCounterRepository
+// NewCounterRepository
 func NewCounterRepository(client *mongo.Client, config2 *config.Config) Counters {
 	return &counters{mongoClient: client, conf: config2}
 }
 
-//UpdateCounter increase sequence of a counter
+// UpdateCounter increase sequence of a counter
 func (c counters) UpdateAndGetCounter(ctx context.Context, counterStr string) (int64, error) {
 	collection := c.mongoClient.Database(c.conf.MongoDatabaseName).Collection("counters")
 	ctx1, cancel := context.WithTimeout(ctx, time.Duration(c.conf.MongoContextTimeout)*time.Second)
@@ -35,8 +35,8 @@ func (c counters) UpdateAndGetCounter(ctx context.Context, counterStr string) (i
 	var counter models.Counter
 
 	opts := options.FindOneAndUpdate().SetUpsert(true)
-	filter := bson.D{{"name", counterStr}}
-	update := primitive.D{{"$inc", primitive.D{{"sequence", 1}}}}
+	filter := bson.D{{Key: "name", Value: counterStr}}
+	update := bson.D{{Key: "$inc", Value: bson.D{{Key: "sequence", Value: 1}}}} // Changed to use bson.D
 
 	err := collection.FindOneAndUpdate(ctx1, filter, update, opts).Decode(&counter)
 

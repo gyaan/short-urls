@@ -3,13 +3,14 @@ package repositories
 import (
 	"context"
 	"fmt"
+	"log"
+	"time"
+
 	"github.com/gyaan/short-urls/internal/config"
 	"github.com/gyaan/short-urls/internal/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"log"
-	"time"
 )
 
 type users struct {
@@ -17,7 +18,7 @@ type users struct {
 	conf        *config.Config
 }
 
-//Users
+// Users
 type Users interface {
 	CreateUser(ctx context.Context, user models.User) (*models.User, error)
 	UpdateUser(ctx context.Context, userId string, user *models.User) error
@@ -25,7 +26,7 @@ type Users interface {
 	GetUserDetailsById(ctx context.Context, userId string) (*models.User, error)
 }
 
-//NewUserRepository
+// NewUserRepository
 func NewUserRepository(client *mongo.Client, config2 *config.Config) Users {
 	return &users{
 		mongoClient: client,
@@ -33,7 +34,7 @@ func NewUserRepository(client *mongo.Client, config2 *config.Config) Users {
 	}
 }
 
-//RegisterUser creates new user
+// RegisterUser creates new user
 func (u *users) CreateUser(ctx context.Context, user models.User) (*models.User, error) {
 	collection := u.mongoClient.Database(u.conf.MongoDatabaseName).Collection("users")
 	res, err := collection.InsertOne(ctx, user)
@@ -46,11 +47,12 @@ func (u *users) CreateUser(ctx context.Context, user models.User) (*models.User,
 	return &user, nil
 }
 
-//UpdateUser updates a user
+// UpdateUser updates a user
 func (u *users) UpdateUser(ctx context.Context, userId string, user *models.User) error {
 
 	collection := u.mongoClient.Database(u.conf.MongoDatabaseName).Collection("users")
-	ctx1, _ := context.WithTimeout(ctx, time.Duration(u.conf.MongoContextTimeout)*time.Second)
+	ctx1, cancel := context.WithTimeout(ctx, time.Duration(u.conf.MongoContextTimeout)*time.Second)
+	defer cancel()
 
 	id, err := primitive.ObjectIDFromHex(userId)
 	if err != nil {
@@ -58,12 +60,12 @@ func (u *users) UpdateUser(ctx context.Context, userId string, user *models.User
 		return err
 	}
 
-	filter := bson.D{{"_id", id}}
+	filter := bson.D{{Key: "_id", Value: id}}
 	res, err := collection.UpdateOne(ctx1, filter, bson.D{{
-		"$set", bson.D{
-			{"email", user.Email},
-			{"password", user.Password},
-			{"status", user.Status},
+		Key: "$set", Value: bson.D{
+			{Key: "email", Value: user.Email},
+			{Key: "password", Value: user.Password},
+			{Key: "status", Value: user.Status},
 		},
 	}})
 	if err != nil {
@@ -75,14 +77,14 @@ func (u *users) UpdateUser(ctx context.Context, userId string, user *models.User
 	return nil
 }
 
-//GetUserDetails get user details for a name
+// GetUserDetails get user details for a name
 func (u *users) GetUserDetailsByName(ctx context.Context, name string) (*models.User, error) {
 	collection := u.mongoClient.Database(u.conf.MongoDatabaseName).Collection("users")
 	ctx1, cancel := context.WithTimeout(ctx, time.Duration(u.conf.MongoContextTimeout)*time.Second)
 	defer cancel()
 	var user models.User
 
-	filter := bson.D{{"name", name}}
+	filter := bson.D{{Key: "name", Value: name}}
 	err := collection.FindOne(ctx1, filter).Decode(&user)
 	if err != nil {
 		log.Printf("Error getting user details")
@@ -92,7 +94,7 @@ func (u *users) GetUserDetailsByName(ctx context.Context, name string) (*models.
 	return &user, nil
 }
 
-//GetUserDetails get user details by id
+// GetUserDetails get user details by id
 func (u *users) GetUserDetailsById(ctx context.Context, userId string) (*models.User, error) {
 	collection := u.mongoClient.Database(u.conf.MongoDatabaseName).Collection("users")
 	ctx1, cancel := context.WithTimeout(ctx, time.Duration(u.conf.MongoContextTimeout)*time.Second)
@@ -104,7 +106,7 @@ func (u *users) GetUserDetailsById(ctx context.Context, userId string) (*models.
 		return nil, err
 	}
 
-	filter := bson.D{{"_id", id}}
+	filter := bson.D{{Key: "_id", Value: id}}
 	err = collection.FindOne(ctx1, filter).Decode(&user)
 	if err != nil {
 		log.Printf("Error getting user details %v", err)

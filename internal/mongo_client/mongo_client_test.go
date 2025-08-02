@@ -44,8 +44,8 @@ func TestGetClient(t *testing.T) {
 		want *mongo.Client
 	}{
 		{
-			name:"not valid",
-			want:nil,
+			name: "not valid",
+			want: nil,
 		},
 	}
 	for _, tt := range tests {

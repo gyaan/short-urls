@@ -1,59 +1,62 @@
+// Package url_shortner provides URL shortening functionality
 package url_shortner
 
 import (
 	"strconv"
 )
 
+// urlShortener implements URL shortening logic
 type urlShortener struct {
 	charMap map[int64]string
 }
 
-//UrlShortener
+// UrlShortener defines the interface for URL shortening operations
 type UrlShortener interface {
 	GetShortUrl(urlIdentifier int64) string
 	GetIdentifierNumberFromShortUrl(str string) int64
 }
 
-//New
+// New creates a new URL shortener instance
 func New() UrlShortener {
 	return &urlShortener{
 		charMap: getCharMap(),
 	}
 }
 
+// getCharMap creates a character mapping for URL shortening
 func getCharMap() map[int64]string {
-
-	chrMap := map[int64]string{}
+	charMap := map[int64]string{}
 	mapIndex := int64(0)
 
-	//a - z
+	// Map lowercase letters a-z
 	for j := rune('a'); j <= rune('z'); j++ {
-		chrMap[mapIndex] = string(j)
+		charMap[mapIndex] = string(j)
 		mapIndex++
 	}
 
-	// A -Z
+	// Map uppercase letters A-Z
 	for k := rune('A'); k <= rune('Z'); k++ {
-		chrMap[mapIndex] = string(k)
+		charMap[mapIndex] = string(k)
 		mapIndex++
 	}
 
-	//0 - 9
+	// Map digits 0-9
 	for i := 0; i <= 9; i++ {
-		chrMap[mapIndex] = strconv.Itoa(i)
+		charMap[mapIndex] = strconv.Itoa(i)
 		mapIndex++
 	}
 
-	return chrMap
+	return charMap
 }
 
+// GetShortUrl converts a numeric identifier to a short URL string
 func (s urlShortener) GetShortUrl(n int64) string {
-	srtUlr := ""
+	shortUrl := ""
 	for n > 0 {
-		srtUlr += s.charMap[n%62]
+		shortUrl += s.charMap[n%62]
 		n = n / 62
 	}
-	return reversString(srtUlr)
+	return reverseString(shortUrl)
 }
 
 func (s urlShortener) GetIdentifierNumberFromShortUrl(str string) int64 {
@@ -77,20 +80,22 @@ func (s urlShortener) GetIdentifierNumberFromShortUrl(str string) int64 {
 	return num
 }
 
-func reversString(str string) string {
-
-	// Get Unicode code points.
+// reverseString reverses a string using Unicode-aware operations
+func reverseString(str string) string {
+	// Get Unicode code points
 	n := 0
-	rune := make([]rune, len(str))
+	runes := make([]rune, len(str))
 	for _, r := range str {
-		rune[n] = r
+		runes[n] = r
 		n++
 	}
-	rune = rune[0:n]
-	// Reverse
+	runes = runes[0:n]
+
+	// Reverse the runes
 	for i := 0; i < n/2; i++ {
-		rune[i], rune[n-1-i] = rune[n-1-i], rune[i]
+		runes[i], runes[n-1-i] = runes[n-1-i], runes[i]
 	}
-	// Convert back to UTF-8.
-	return string(rune)
+
+	// Convert back to UTF-8
+	return string(runes)
 }
